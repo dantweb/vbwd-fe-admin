@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import Dashboard from '@/views/Dashboard.vue'
-import { PlatformSDK } from '@dantweb/view-component'
-import type { ComponentDefinition } from '@dantweb/view-component'
+import { PlatformSDK } from 'vbwd-view-component'
+import type { ComponentDefinition } from 'vbwd-view-component'
 import { h, nextTick } from 'vue'
 
 // Mock the API module

@@ -1,7 +1,7 @@
 /**
  * Auth Store - Re-export from core SDK
  *
- * This file re-exports the auth store from @dantweb/view-component
+ * This file re-exports the auth store from vbwd-view-component
  * for backward compatibility with existing imports.
  */
 export {
@@ -13,7 +13,7 @@ export {
   type AuthStoreConfig,
   type LoginCredentials,
   type LoginResponse,
-} from '@dantweb/view-component';
+} from 'vbwd-view-component';
 
 // Legacy type aliases for backward compatibility
-export type AdminUser = import('@dantweb/view-component').AuthUser;
+export type AdminUser = import('vbwd-view-component').AuthUser;

@@ -1,5 +1,8 @@
 <template>
-  <div v-if="taroLimits" class="section user-taro-section">
+  <div
+    v-if="taroLimits"
+    class="section user-taro-section"
+  >
     <h3>🔮 {{ $t('taro.title', 'Taro Sessions') }}</h3>
     <div class="info-grid">
       <div class="info-item">

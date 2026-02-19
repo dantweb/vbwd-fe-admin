@@ -6,28 +6,52 @@
     </div>
 
     <!-- Loading state -->
-    <div v-if="isLoading" class="loading-state">
+    <div
+      v-if="isLoading"
+      class="loading-state"
+    >
       <div class="spinner" />
       <p>Loading prompts...</p>
     </div>
 
     <!-- Error state -->
-    <div v-else-if="errorMessage" class="error-state">
+    <div
+      v-else-if="errorMessage"
+      class="error-state"
+    >
       <p>{{ errorMessage }}</p>
-      <button class="retry-btn" @click="loadPrompts">Retry</button>
+      <button
+        class="retry-btn"
+        @click="loadPrompts"
+      >
+        Retry
+      </button>
     </div>
 
     <!-- Prompts list -->
-    <div v-else class="prompts-container">
-      <div v-for="(_prompt, slug) in prompts" :key="slug" class="prompt-card">
+    <div
+      v-else
+      class="prompts-container"
+    >
+      <div
+        v-for="(_prompt, slug) in prompts"
+        :key="slug"
+        class="prompt-card"
+      >
         <!-- Header -->
-        <div class="prompt-header" @click="togglePrompt(slug)">
+        <div
+          class="prompt-header"
+          @click="togglePrompt(slug)"
+        >
           <span class="prompt-name">{{ slug }}</span>
           <span class="toggle-icon">{{ expandedPrompt === slug ? '▼' : '▶' }}</span>
         </div>
 
         <!-- Content -->
-        <div v-if="expandedPrompt === slug" class="prompt-content">
+        <div
+          v-if="expandedPrompt === slug"
+          class="prompt-content"
+        >
           <!-- Template -->
           <div class="section">
             <label>Template (Jinja2)</label>
@@ -43,20 +67,40 @@
           <!-- Variables display -->
           <div class="section">
             <label>Variables</label>
-            <div v-if="editingPrompt[slug].variables?.length > 0" class="variables-display">
-              <span v-for="(v, i) in editingPrompt[slug].variables" :key="i" class="variable-badge">
+            <div
+              v-if="editingPrompt[slug].variables?.length > 0"
+              class="variables-display"
+            >
+              <span
+                v-for="(v, i) in editingPrompt[slug].variables"
+                :key="i"
+                class="variable-badge"
+              >
                 {{ v }}
               </span>
             </div>
-            <p v-else class="empty-state">No variables in this template</p>
+            <p
+              v-else
+              class="empty-state"
+            >
+              No variables in this template
+            </p>
           </div>
 
           <!-- Actions -->
           <div class="section-actions">
-            <button class="btn btn-primary" :disabled="isSaving" @click="savePrompt(slug)">
+            <button
+              class="btn btn-primary"
+              :disabled="isSaving"
+              @click="savePrompt(slug)"
+            >
               {{ isSaving ? 'Saving...' : 'Save' }}
             </button>
-            <button class="btn btn-secondary" :disabled="isSaving" @click="discardChanges(slug)">
+            <button
+              class="btn btn-secondary"
+              :disabled="isSaving"
+              @click="discardChanges(slug)"
+            >
               Cancel
             </button>
           </div>
