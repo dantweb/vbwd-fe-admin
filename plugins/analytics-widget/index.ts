@@ -1,4 +1,4 @@
-import type { IPlugin, IPlatformSDK } from '@vbwd/view-component'
+import type { IPlugin, IPlatformSDK } from '@dantweb/view-component'
 
 /**
  * Analytics Widget Plugin

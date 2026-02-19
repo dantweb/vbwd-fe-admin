@@ -9,8 +9,8 @@ import {
   useAuthStore,
   PluginRegistry,
   PlatformSDK
-} from '@vbwd/view-component';
-import type { IPlugin } from '@vbwd/view-component';
+} from '@dantweb/view-component';
+import type { IPlugin } from '@dantweb/view-component';
 import { getEnabledPlugins, getAdminExtensions } from '@/utils/pluginLoader';
 import i18n, { initLocale, setLocale, type LocaleCode, availableLocales } from '@/i18n';
 import { extensionRegistry } from '@/plugins/extensionRegistry';

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { analyticsWidgetPlugin } from '@plugins/analytics-widget/index'
 import AnalyticsWidget from '@plugins/analytics-widget/AnalyticsWidget.vue'
-import { PlatformSDK } from '@vbwd/view-component'
+import { PlatformSDK } from '@dantweb/view-component'
 import { api } from '@/api'
 
 // Mock the API module

@@ -5,7 +5,7 @@
  * Completely independent from the user-side Taro plugin.
  */
 
-import type { IPlugin } from '@vbwd/view-component';
+import type { IPlugin } from '@dantweb/view-component';
 import { extensionRegistry } from '../../vue/src/plugins/extensionRegistry';
 import taroAdminExtension from './extension';
 

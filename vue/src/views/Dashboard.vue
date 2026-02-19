@@ -117,7 +117,7 @@
 import { computed, onMounted, inject, defineAsyncComponent } from 'vue'
 import { useAnalyticsStore } from '../stores/analytics'
 import { usePluginsStore } from '../stores/plugins'
-import type { IPlatformSDK } from '@vbwd/view-component'
+import type { IPlatformSDK } from '@dantweb/view-component'
 
 const analyticsStore = useAnalyticsStore()
 const pluginsStore = usePluginsStore()

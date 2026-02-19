@@ -23,6 +23,6 @@ export default defineConfig({
   },
   // Optimize deps to ensure proper module resolution
   optimizeDeps: {
-    include: ['pinia', 'vue', 'vue-router', '@vbwd/view-component']
+    include: ['pinia', 'vue', 'vue-router', '@dantweb/view-component']
   }
 })
