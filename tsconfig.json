@@ -17,19 +17,20 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./vue/src/*"],
-      "@plugins/*": ["./plugins/*"],
-      "vue": ["./node_modules/vue"]
+      "@/*": ["./src/*"],
+      "@plugins/*": ["../plugins/*"],
+      "vue": ["./node_modules/vue"],
+      "@vbwd/view-component": ["./node_modules/@vbwd/view-component"]
     },
     "types": ["vite/client", "vitest/globals"]
   },
   "include": [
-    "vue/src/**/*.ts",
-    "vue/src/**/*.tsx",
-    "vue/src/**/*.vue",
-    "plugins/**/*.ts",
-    "plugins/**/*.vue",
-    "vue/tests/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "../plugins/**/*.ts",
+    "../plugins/**/*.vue",
+    "tests/**/*.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
