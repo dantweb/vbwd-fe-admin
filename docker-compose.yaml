@@ -1,16 +1,25 @@
 services:
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - dev
+    profiles:
+      - dev
+
   # Development mode with hot reload
   dev:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./vue:/app
-      - ./plugins:/plugins
-      - ../../vbwd-fe-core:/core
+      - .:/app
+      - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
-    ports:
-      - "5174:5173"
-    command: sh -c "npm install && npm run dev -- --host"
+    command: sh -c "npm install --no-package-lock && npm run dev -- --host"
     environment:
       - VITE_API_URL=/api/v1
     profiles:
@@ -21,9 +30,8 @@ services:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./vue:/app
-      - ./plugins:/plugins
-      - ../../vbwd-fe-core:/core
+      - .:/app
+      - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
     command: sh -c "npm install && npm run test"
     profiles:
@@ -34,9 +42,8 @@ services:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./vue:/app
-      - ./plugins:/plugins
-      - ../../vbwd-fe-core:/core
+      - .:/app
+      - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
     command: sh -c "npm install && npm run test:watch"
     profiles:
@@ -47,9 +54,8 @@ services:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./vue:/app
-      - ./plugins:/plugins
-      - ../../vbwd-fe-core:/core
+      - .:/app
+      - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
     command: sh -c "npm install && ./bin/pre-commit-check.sh --style"
     profiles:
@@ -60,9 +66,8 @@ services:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./vue:/app
-      - ./plugins:/plugins
-      - ../../vbwd-fe-core:/core
+      - .:/app
+      - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
     command: sh -c "npm install && ./bin/pre-commit-check.sh --unit"
     profiles:
@@ -73,9 +78,8 @@ services:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./vue:/app
-      - ./plugins:/plugins
-      - ../../vbwd-fe-core:/core
+      - .:/app
+      - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
     command: sh -c "npm install && ./bin/pre-commit-check.sh --integration"
     profiles:
