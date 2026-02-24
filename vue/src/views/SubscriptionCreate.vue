@@ -153,23 +153,6 @@
               </option>
             </select>
           </div>
-
-          <div
-            v-if="formData.status === 'TRIALING'"
-            class="form-group"
-          >
-            <label for="trialDays">{{ $t('subscriptions.trialDays') }}</label>
-            <input
-              id="trialDays"
-              v-model.number="formData.trial_days"
-              name="trialDays"
-              type="number"
-              min="1"
-              max="90"
-              placeholder="14"
-              class="form-input"
-            >
-          </div>
         </div>
       </section>
 
@@ -225,8 +208,7 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 // Form data
 const formData = ref({
   plan_id: '',
-  status: 'active',
-  trial_days: 14,
+  status: 'ACTIVE',
 });
 
 const activePlans = computed(() =>
@@ -310,11 +292,6 @@ function validateForm(): boolean {
     return false;
   }
 
-  if (formData.value.status === 'trialing' && (!formData.value.trial_days || formData.value.trial_days < 1)) {
-    validationError.value = t('subscriptions.validation.trialDaysMin');
-    return false;
-  }
-
   return true;
 }
 
@@ -328,12 +305,8 @@ async function handleSubmit(): Promise<void> {
     const data: CreateSubscriptionData = {
       user_id: selectedUser.value!.id,
       plan_id: formData.value.plan_id,
-      status: formData.value.status,
+      status: formData.value.status.toLowerCase(),
     };
-
-    if (formData.value.status === 'trialing') {
-      data.trial_days = formData.value.trial_days;
-    }
 
     const subscription = await subscriptionsStore.createSubscription(data);
     router.push(`/admin/subscriptions/${subscription.id}`);

@@ -13,6 +13,8 @@ export interface Subscription {
   current_period_end?: string;
   created_at?: string;
   canceled_at?: string;
+  trial_end_at?: string;
+  is_trialing?: boolean;
 }
 
 export interface SubscriptionDetail extends Subscription {
@@ -39,7 +41,6 @@ export interface CreateSubscriptionData {
   user_id: string;
   plan_id: string;
   status?: string;
-  trial_days?: number;
 }
 
 export interface FetchSubscriptionsResponse {

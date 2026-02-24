@@ -36,7 +36,8 @@
     "description": "Описание",
     "none": "Нет",
     "na": "Н/Д",
-    "clear": "Очистить"
+    "clear": "Очистить",
+    "searching": "Поиск..."
   },
   "nav": {
     "dashboard": "Главная",
@@ -191,7 +192,8 @@
     "failedToSavePlan": "Не удалось сохранить тариф",
     "failedToArchivePlan": "Не удалось архивировать тариф",
     "failedToReactivatePlan": "Не удалось реактивировать тариф",
-    "failedToCopyPlan": "Не удалось скопировать тариф"
+    "failedToCopyPlan": "Не удалось скопировать тариф",
+    "trialDays": "Пробные дни"
   },
   "subscriptions": {
     "title": "Подписки",
@@ -236,9 +238,18 @@
     "initialStatus": "Начальный статус",
     "trialDays": "Пробные дни",
     "creating": "Создание...",
-    "selectUserRequired": "Выберите пользователя",
-    "selectPlanRequired": "Выберите тариф",
-    "trialDaysInvalid": "Пробный период должен быть минимум 1 день"
+    "searchUserByEmail": "Поиск пользователя по Email",
+    "enterEmailToSearch": "Введите email для поиска",
+    "selectAPlan": "Выберите тариф",
+    "clear": "Очистить",
+    "trialEndDate": "Дата окончания пробного периода",
+    "daysRemaining": "Дней осталось",
+    "trialInfo": "Информация о пробном периоде",
+    "createFailed": "Не удалось создать подписку",
+    "validation": {
+      "selectUser": "Выберите пользователя",
+      "selectPlan": "Выберите тариф"
+    }
   },
   "invoices": {
     "title": "Счета",

@@ -20,6 +20,7 @@ export interface AdminPlan {
   is_active: boolean;
   subscriber_count?: number;
   created_at?: string;
+  trial_days?: number;
 }
 
 export interface CreatePlanData {
@@ -28,6 +29,7 @@ export interface CreatePlanData {
   billing_period: string;
   features?: string[] | Record<string, unknown>;
   limits?: Record<string, number>;
+  trial_days?: number;
 }
 
 export const usePlanAdminStore = defineStore('planAdmin', {

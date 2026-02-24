@@ -38,6 +38,7 @@
     "none": "None",
     "na": "N/A",
     "clear": "Clear",
+    "searching": "Searching...",
     "selected": "{count} selected"
   },
   "nav": {
@@ -204,7 +205,8 @@
     "failedToCopyPlan": "Failed to copy plan",
     "bulkActivate": "Activate Selected",
     "bulkDeactivate": "Deactivate Selected",
-    "bulkDelete": "Delete Selected"
+    "bulkDelete": "Delete Selected",
+    "trialDays": "Trial Days"
   },
   "subscriptions": {
     "title": "Subscriptions",
@@ -254,7 +256,17 @@
     "creating": "Creating...",
     "selectUserRequired": "Please select a user",
     "selectPlanRequired": "Please select a plan",
-    "trialDaysInvalid": "Trial days must be at least 1"
+    "trialDaysInvalid": "Trial days must be at least 1",
+    "searchUserByEmail": "Search user by email",
+    "enterEmailToSearch": "Enter email to search",
+    "selectAPlan": "Select a plan",
+    "trialEndDate": "Trial End Date",
+    "daysRemaining": "Days Remaining",
+    "trialInfo": "Trial Information",
+    "validation": {
+      "selectUser": "Please select a user",
+      "selectPlan": "Please select a plan"
+    }
   },
   "invoices": {
     "title": "Invoices",

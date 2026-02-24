@@ -36,7 +36,8 @@
     "description": "描述",
     "none": "无",
     "na": "不适用",
-    "clear": "清除"
+    "clear": "清除",
+    "searching": "搜索中..."
   },
   "nav": {
     "dashboard": "仪表板",
@@ -191,7 +192,8 @@
     "failedToSavePlan": "保存计划失败",
     "failedToArchivePlan": "归档计划失败",
     "failedToReactivatePlan": "重新激活计划失败",
-    "failedToCopyPlan": "复制计划失败"
+    "failedToCopyPlan": "复制计划失败",
+    "trialDays": "试用天数"
   },
   "subscriptions": {
     "title": "订阅",
@@ -236,9 +238,18 @@
     "initialStatus": "初始状态",
     "trialDays": "试用天数",
     "creating": "创建中...",
-    "selectUserRequired": "请选择用户",
-    "selectPlanRequired": "请选择计划",
-    "trialDaysInvalid": "试用天数必须至少为1"
+    "searchUserByEmail": "通过邮箱搜索用户",
+    "enterEmailToSearch": "输入邮箱搜索",
+    "selectAPlan": "选择计划",
+    "clear": "清除",
+    "trialEndDate": "试用结束日期",
+    "daysRemaining": "剩余天数",
+    "trialInfo": "试用信息",
+    "createFailed": "创建订阅失败",
+    "validation": {
+      "selectUser": "请选择用户",
+      "selectPlan": "请选择计划"
+    }
   },
   "invoices": {
     "title": "发票",

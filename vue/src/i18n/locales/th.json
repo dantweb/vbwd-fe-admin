@@ -36,7 +36,8 @@
     "description": "คำอธิบาย",
     "none": "ไม่มี",
     "na": "ไม่ระบุ",
-    "clear": "ล้าง"
+    "clear": "ล้าง",
+    "searching": "กำลังค้นหา..."
   },
   "nav": {
     "dashboard": "แดชบอร์ด",
@@ -191,7 +192,8 @@
     "failedToSavePlan": "บันทึกแผนไม่สำเร็จ",
     "failedToArchivePlan": "เก็บถาวรแผนไม่สำเร็จ",
     "failedToReactivatePlan": "เปิดใช้งานแผนใหม่ไม่สำเร็จ",
-    "failedToCopyPlan": "คัดลอกแผนไม่สำเร็จ"
+    "failedToCopyPlan": "คัดลอกแผนไม่สำเร็จ",
+    "trialDays": "จำนวนวันทดลอง"
   },
   "subscriptions": {
     "title": "การสมัครสมาชิก",
@@ -236,9 +238,18 @@
     "initialStatus": "สถานะเริ่มต้น",
     "trialDays": "จำนวนวันทดลองใช้",
     "creating": "กำลังสร้าง...",
-    "selectUserRequired": "กรุณาเลือกผู้ใช้",
-    "selectPlanRequired": "กรุณาเลือกแผน",
-    "trialDaysInvalid": "จำนวนวันทดลองใช้ต้องมีอย่างน้อย 1 วัน"
+    "searchUserByEmail": "ค้นหาผู้ใช้ด้วยอีเมล",
+    "enterEmailToSearch": "กรอกอีเมลเพื่อค้นหา",
+    "selectAPlan": "เลือกแผน",
+    "clear": "ล้าง",
+    "trialEndDate": "วันสิ้นสุดทดลองใช้",
+    "daysRemaining": "จำนวนวันที่เหลือ",
+    "trialInfo": "ข้อมูลการทดลองใช้",
+    "createFailed": "สร้างการสมัครสมาชิกไม่สำเร็จ",
+    "validation": {
+      "selectUser": "กรุณาเลือกผู้ใช้",
+      "selectPlan": "กรุณาเลือกแผน"
+    }
   },
   "invoices": {
     "title": "ใบแจ้งหนี้",

@@ -36,7 +36,8 @@
     "description": "Description",
     "none": "Aucun",
     "na": "N/D",
-    "clear": "Effacer"
+    "clear": "Effacer",
+    "searching": "Recherche..."
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -191,7 +192,8 @@
     "failedToSavePlan": "Échec de l'enregistrement du plan",
     "failedToArchivePlan": "Échec de l'archivage du plan",
     "failedToReactivatePlan": "Échec de la réactivation du plan",
-    "failedToCopyPlan": "Échec de la copie du plan"
+    "failedToCopyPlan": "Échec de la copie du plan",
+    "trialDays": "Jours d'essai"
   },
   "subscriptions": {
     "title": "Abonnements",
@@ -236,9 +238,18 @@
     "initialStatus": "Statut initial",
     "trialDays": "Jours d'essai",
     "creating": "Création...",
-    "selectUserRequired": "Veuillez sélectionner un utilisateur",
-    "selectPlanRequired": "Veuillez sélectionner un plan",
-    "trialDaysInvalid": "Les jours d'essai doivent être au moins 1"
+    "searchUserByEmail": "Rechercher un utilisateur par e-mail",
+    "enterEmailToSearch": "Entrez l'e-mail pour rechercher",
+    "selectAPlan": "Sélectionnez un plan",
+    "clear": "Effacer",
+    "trialEndDate": "Date de fin d'essai",
+    "daysRemaining": "Jours restants",
+    "trialInfo": "Informations sur l'essai",
+    "createFailed": "Échec de la création de l'abonnement",
+    "validation": {
+      "selectUser": "Veuillez sélectionner un utilisateur",
+      "selectPlan": "Veuillez sélectionner un plan"
+    }
   },
   "invoices": {
     "title": "Factures",

@@ -36,7 +36,8 @@
     "description": "説明",
     "none": "なし",
     "na": "該当なし",
-    "clear": "クリア"
+    "clear": "クリア",
+    "searching": "検索中..."
   },
   "nav": {
     "dashboard": "ダッシュボード",
@@ -191,7 +192,8 @@
     "failedToSavePlan": "プランの保存に失敗しました",
     "failedToArchivePlan": "プランのアーカイブに失敗しました",
     "failedToReactivatePlan": "プランの再有効化に失敗しました",
-    "failedToCopyPlan": "プランのコピーに失敗しました"
+    "failedToCopyPlan": "プランのコピーに失敗しました",
+    "trialDays": "試用日数"
   },
   "subscriptions": {
     "title": "サブスクリプション",
@@ -236,9 +238,18 @@
     "initialStatus": "初期ステータス",
     "trialDays": "トライアル日数",
     "creating": "作成中...",
-    "selectUserRequired": "ユーザーを選択してください",
-    "selectPlanRequired": "プランを選択してください",
-    "trialDaysInvalid": "トライアル日数は1以上である必要があります"
+    "searchUserByEmail": "メールでユーザーを検索",
+    "enterEmailToSearch": "メールを入力して検索",
+    "selectAPlan": "プランを選択してください",
+    "clear": "クリア",
+    "trialEndDate": "トライアル終了日",
+    "daysRemaining": "残り日数",
+    "trialInfo": "トライアル情報",
+    "createFailed": "サブスクリプションの作成に失敗しました",
+    "validation": {
+      "selectUser": "ユーザーを選択してください",
+      "selectPlan": "プランを選択してください"
+    }
   },
   "invoices": {
     "title": "請求書",

@@ -36,7 +36,8 @@
     "description": "Descripción",
     "none": "Ninguno",
     "na": "N/D",
-    "clear": "Limpiar"
+    "clear": "Limpiar",
+    "searching": "Buscando..."
   },
   "nav": {
     "dashboard": "Panel",
@@ -191,7 +192,8 @@
     "failedToSavePlan": "Error al guardar el plan",
     "failedToArchivePlan": "Error al archivar el plan",
     "failedToReactivatePlan": "Error al reactivar el plan",
-    "failedToCopyPlan": "Error al copiar el plan"
+    "failedToCopyPlan": "Error al copiar el plan",
+    "trialDays": "Días de Prueba"
   },
   "subscriptions": {
     "title": "Suscripciones",
@@ -236,9 +238,18 @@
     "initialStatus": "Estado Inicial",
     "trialDays": "Días de Prueba",
     "creating": "Creando...",
-    "selectUserRequired": "Por favor seleccione un usuario",
-    "selectPlanRequired": "Por favor seleccione un plan",
-    "trialDaysInvalid": "Los días de prueba deben ser al menos 1"
+    "searchUserByEmail": "Buscar usuario por correo electrónico",
+    "enterEmailToSearch": "Ingrese correo para buscar",
+    "selectAPlan": "Seleccione un plan",
+    "clear": "Limpiar",
+    "trialEndDate": "Fecha de Fin de Prueba",
+    "daysRemaining": "Días Restantes",
+    "trialInfo": "Información de Prueba",
+    "createFailed": "Error al crear la suscripción",
+    "validation": {
+      "selectUser": "Por favor seleccione un usuario",
+      "selectPlan": "Por favor seleccione un plan"
+    }
   },
   "invoices": {
     "title": "Facturas",

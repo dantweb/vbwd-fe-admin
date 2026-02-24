@@ -37,7 +37,8 @@
     "description": "Beschreibung",
     "none": "Keine",
     "na": "N/V",
-    "clear": "Löschen"
+    "clear": "Löschen",
+    "searching": "Suche..."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -197,7 +198,8 @@
     "failedToSavePlan": "Tarif konnte nicht gespeichert werden",
     "failedToArchivePlan": "Tarif konnte nicht archiviert werden",
     "failedToReactivatePlan": "Tarif konnte nicht reaktiviert werden",
-    "failedToCopyPlan": "Tarif konnte nicht kopiert werden"
+    "failedToCopyPlan": "Tarif konnte nicht kopiert werden",
+    "trialDays": "Probetage"
   },
   "subscriptions": {
     "title": "Abonnements",
@@ -245,7 +247,17 @@
     "creating": "Erstellen...",
     "selectUserRequired": "Bitte wählen Sie einen Benutzer",
     "selectPlanRequired": "Bitte wählen Sie einen Tarif",
-    "trialDaysInvalid": "Testtage müssen mindestens 1 sein"
+    "trialDaysInvalid": "Testtage müssen mindestens 1 sein",
+    "searchUserByEmail": "Benutzer per E-Mail suchen",
+    "enterEmailToSearch": "E-Mail eingeben",
+    "selectAPlan": "Plan auswählen",
+    "trialEndDate": "Probeende",
+    "daysRemaining": "Verbleibende Tage",
+    "trialInfo": "Probeinformationen",
+    "validation": {
+      "selectUser": "Bitte wählen Sie einen Benutzer",
+      "selectPlan": "Bitte wählen Sie einen Plan"
+    }
   },
   "invoices": {
     "title": "Rechnungen",

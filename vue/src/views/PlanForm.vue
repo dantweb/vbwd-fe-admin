@@ -106,6 +106,19 @@
       </div>
 
       <div class="form-group">
+        <label for="plan-trial-days">{{ $t('plans.trialDays') }}</label>
+        <input
+          id="plan-trial-days"
+          v-model.number="formData.trial_days"
+          data-testid="plan-trial-days"
+          type="number"
+          min="0"
+          placeholder="0"
+          class="form-input"
+        >
+      </div>
+
+      <div class="form-group">
         <label for="plan-features">{{ $t('plans.featuresOnePerLine') }}</label>
         <textarea
           id="plan-features"
@@ -202,6 +215,7 @@ const formData = ref({
   name: '',
   price: 0,
   billing_period: '' as string,
+  trial_days: 0,
   features: [] as string[] | Record<string, unknown>
 });
 
@@ -265,6 +279,7 @@ async function fetchPlan(): Promise<void> {
         name: response.name || '',
         price: priceValue,
         billing_period: response.billing_period || '',
+        trial_days: response.trial_days || 0,
         features: response.features || []
       };
       planIsActive.value = response.is_active !== false;
@@ -306,11 +321,14 @@ async function handleSubmit(): Promise<void> {
     // Backend expects uppercase enum values (MONTHLY, YEARLY)
     // Convert to uppercase to ensure compatibility with database enum
     const billingPeriod = formData.value.billing_period.toUpperCase() as 'MONTHLY' | 'YEARLY';
+    // Inject default_tokens into features object
+    let features = formData.value.features;
     const data = {
       name: formData.value.name,
       price: formData.value.price,
       billing_period: billingPeriod,
-      features: formData.value.features
+      trial_days: formData.value.trial_days || 0,
+      features
     };
 
     if (isEdit.value) {

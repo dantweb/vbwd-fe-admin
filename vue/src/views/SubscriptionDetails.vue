@@ -74,6 +74,24 @@
         </div>
 
         <div
+          v-if="subscription.is_trialing || subscription.trial_end_at"
+          class="info-section"
+          data-testid="trial-info"
+        >
+          <h3>{{ $t('subscriptions.trialInfo') }}</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>{{ $t('subscriptions.trialEndDate') }}</label>
+              <span>{{ formatDate(subscription.trial_end_at) }}</span>
+            </div>
+            <div class="info-item">
+              <label>{{ $t('subscriptions.daysRemaining') }}</label>
+              <span>{{ trialDaysRemaining }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div
           class="info-section"
           data-testid="billing-period"
         >
@@ -172,6 +190,12 @@ const canceling = ref(false);
 const subscription = computed(() => subscriptionsStore.selectedSubscription);
 const loading = computed(() => subscriptionsStore.loading);
 const error = computed(() => subscriptionsStore.error);
+
+const trialDaysRemaining = computed(() => {
+  if (!subscription.value?.trial_end_at) return 0;
+  const diff = new Date(subscription.value.trial_end_at).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / 86400000));
+});
 
 async function fetchSubscription(): Promise<void> {
   const subscriptionId = route.params.id as string;

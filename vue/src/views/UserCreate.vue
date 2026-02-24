@@ -98,13 +98,13 @@
               name="role"
               class="form-select"
             >
-              <option value="user">
+              <option value="USER">
                 {{ $t('users.roles.user') }}
               </option>
-              <option value="admin">
+              <option value="ADMIN">
                 {{ $t('users.roles.admin') }}
               </option>
-              <option value="vendor">
+              <option value="VENDOR">
                 {{ $t('users.roles.vendor') }}
               </option>
             </select>
@@ -302,7 +302,7 @@ const formData = ref<FormData>({
   email: '',
   password: '',
   status: 'active',
-  role: 'user',
+  role: 'USER',
   details: {
     first_name: '',
     last_name: '',
