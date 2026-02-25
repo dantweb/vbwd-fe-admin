@@ -130,6 +130,81 @@
         />
       </div>
 
+      <!-- Categories (edit mode only) -->
+      <div
+        v-if="isEdit"
+        class="categories-section"
+        data-testid="categories-section"
+      >
+        <h3>{{ $t('categories.categoriesTab') }}</h3>
+        <div class="categories-panels">
+          <div class="category-panel">
+            <h4>{{ $t('categories.available') }}</h4>
+            <div class="category-list">
+              <div
+                v-for="cat in availableCategories"
+                :key="cat.id"
+                class="category-item"
+                :data-testid="`available-category-${cat.id}`"
+              >
+                <span>{{ cat.name }}</span>
+                <span
+                  class="type-badge"
+                  :class="cat.is_single ? 'single' : 'multi'"
+                >
+                  {{ cat.is_single ? 'Single' : 'Multi' }}
+                </span>
+                <button
+                  type="button"
+                  class="assign-btn"
+                  @click="assignCategory(cat.id)"
+                >
+                  +
+                </button>
+              </div>
+              <p
+                v-if="availableCategories.length === 0"
+                class="empty-hint"
+              >
+                {{ $t('categories.allAssigned') }}
+              </p>
+            </div>
+          </div>
+          <div class="category-panel">
+            <h4>{{ $t('categories.assigned') }}</h4>
+            <div class="category-list">
+              <div
+                v-for="cat in assignedCategories"
+                :key="cat.id"
+                class="category-item"
+                :data-testid="`assigned-category-${cat.id}`"
+              >
+                <span>{{ cat.name }}</span>
+                <span
+                  class="type-badge"
+                  :class="cat.is_single ? 'single' : 'multi'"
+                >
+                  {{ cat.is_single ? 'Single' : 'Multi' }}
+                </span>
+                <button
+                  type="button"
+                  class="unassign-btn"
+                  @click="unassignCategory(cat.id)"
+                >
+                  &times;
+                </button>
+              </div>
+              <p
+                v-if="assignedCategories.length === 0"
+                class="empty-hint"
+              >
+                {{ $t('categories.noneAssigned') }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <div class="form-actions-left">
           <button
@@ -192,11 +267,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePlanAdminStore } from '@/stores/planAdmin';
+import { useCategoryAdminStore, type AdminCategory } from '@/stores/categoryAdmin';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const planStore = usePlanAdminStore();
+const categoryStore = useCategoryAdminStore();
 
 const isEdit = computed(() => route.params.id && route.params.id !== 'new');
 const planId = computed(() => route.params.id as string);
@@ -210,6 +287,8 @@ const archiving = ref(false);
 const reactivating = ref(false);
 const copying = ref(false);
 const planIsActive = ref(true);
+const planCategoryIds = ref<string[]>([]);
+const allCategories = ref<AdminCategory[]>([]);
 
 const formData = ref({
   name: '',
@@ -392,9 +471,49 @@ async function handleCopy(): Promise<void> {
   }
 }
 
-onMounted(() => {
+const availableCategories = computed(() => {
+  return allCategories.value.filter(c => !planCategoryIds.value.includes(c.id));
+});
+
+const assignedCategories = computed(() => {
+  return allCategories.value.filter(c => planCategoryIds.value.includes(c.id));
+});
+
+async function assignCategory(categoryId: string): Promise<void> {
+  try {
+    await categoryStore.attachPlans(categoryId, [planId.value]);
+    planCategoryIds.value.push(categoryId);
+  } catch (error) {
+    submitError.value = (error as Error).message || 'Failed to assign category';
+  }
+}
+
+async function unassignCategory(categoryId: string): Promise<void> {
+  try {
+    await categoryStore.detachPlans(categoryId, [planId.value]);
+    planCategoryIds.value = planCategoryIds.value.filter(id => id !== categoryId);
+  } catch (error) {
+    submitError.value = (error as Error).message || 'Failed to unassign category';
+  }
+}
+
+onMounted(async () => {
   if (isEdit.value) {
-    fetchPlan();
+    await fetchPlan();
+
+    // Load categories
+    try {
+      const cats = await categoryStore.fetchCategories('flat');
+      allCategories.value = cats;
+
+      // Extract assigned category IDs from the plan data
+      const plan = planStore.selectedPlan;
+      if (plan && (plan as any).categories) {
+        planCategoryIds.value = ((plan as any).categories as { id: string }[]).map(c => c.id);
+      }
+    } catch {
+      // Non-critical
+    }
   }
 });
 </script>
@@ -613,5 +732,114 @@ onMounted(() => {
 .copy-btn:disabled {
   background: #95a5a6;
   cursor: not-allowed;
+}
+
+.categories-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.categories-section h3 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+}
+
+.categories-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.category-panel h4 {
+  margin: 0 0 10px 0;
+  color: #555;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-list {
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  min-height: 100px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.category-item:hover {
+  background: #f8f9fa;
+}
+
+.category-item span:first-child {
+  flex: 1;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.type-badge.single {
+  background: #d4edda;
+  color: #155724;
+}
+
+.type-badge.multi {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.assign-btn,
+.unassign-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.assign-btn {
+  background: #d4edda;
+  color: #155724;
+}
+
+.assign-btn:hover {
+  background: #c3e6cb;
+}
+
+.unassign-btn {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.unassign-btn:hover {
+  background: #f5c6cb;
+}
+
+.empty-hint {
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  padding: 20px 0;
 }
 </style>

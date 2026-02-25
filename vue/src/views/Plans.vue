@@ -5,6 +5,37 @@
   >
     <div class="plans-header">
       <h2>{{ $t('plans.title') }}</h2>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" data-testid="plans-tabs">
+      <button
+        class="tab-btn"
+        :class="{ active: activeTab === 'plans' }"
+        data-testid="tab-plans"
+        @click="activeTab = 'plans'"
+      >
+        {{ $t('plans.plansTab') }}
+      </button>
+      <button
+        class="tab-btn"
+        :class="{ active: activeTab === 'categories' }"
+        data-testid="tab-categories"
+        @click="activeTab = 'categories'"
+      >
+        {{ $t('categories.categoriesTab') }}
+      </button>
+    </div>
+
+    <!-- Categories Tab -->
+    <CategoriesTab
+      v-if="activeTab === 'categories'"
+      :active="activeTab === 'categories'"
+    />
+
+    <!-- Plans Tab -->
+    <template v-if="activeTab === 'plans'">
+    <div class="plans-subheader">
       <button
         data-testid="create-plan-button"
         class="create-btn"
@@ -174,6 +205,7 @@
             {{ $t('plans.subscribers') }}
             <span class="sort-indicator">{{ getSortIndicator('subscriber_count') }}</span>
           </th>
+          <th>{{ $t('plans.categories') }}</th>
           <th
             class="sortable"
             :class="{ sorted: sortColumn === 'status', 'sort-asc': sortColumn === 'status' && sortDirection === 'asc', 'sort-desc': sortColumn === 'status' && sortDirection === 'desc' }"
@@ -211,6 +243,17 @@
           <td>{{ formatPrice(plan.price_float, typeof plan.price === 'object' ? plan.price?.currency_code : undefined) }}</td>
           <td>{{ plan.billing_period }}</td>
           <td>{{ plan.subscriber_count ?? 0 }}</td>
+          <td class="categories-cell">
+            <span
+              v-for="cat in (plan.categories || [])"
+              :key="cat.id"
+              class="category-slug"
+            >{{ cat.slug }}</span>
+            <span
+              v-if="!plan.categories || plan.categories.length === 0"
+              class="no-category"
+            >—</span>
+          </td>
           <td>
             <span
               v-if="plan.is_active"
@@ -240,6 +283,7 @@
         </tr>
       </tbody>
     </table>
+    </template>
   </div>
 </template>
 
@@ -247,10 +291,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePlanAdminStore } from '@/stores/planAdmin';
+import CategoriesTab from '@/components/CategoriesTab.vue';
 
 const router = useRouter();
 const planStore = usePlanAdminStore();
 
+const activeTab = ref<'plans' | 'categories'>('plans');
 const includeArchived = ref(false);
 const searchQuery = ref('');
 const selectedPlans = ref(new Set<string>());
@@ -547,6 +593,41 @@ onMounted(() => {
   color: #2c3e50;
 }
 
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab-btn:hover {
+  color: #2c3e50;
+}
+
+.tab-btn.active {
+  color: #3498db;
+  border-bottom-color: #3498db;
+}
+
+.plans-subheader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
 .create-btn {
   padding: 10px 20px;
   background: #27ae60;
@@ -713,6 +794,27 @@ onMounted(() => {
 
 .action-btn.archive:hover {
   background: #e0a800;
+}
+
+.categories-cell {
+  max-width: 200px;
+}
+
+.category-slug {
+  display: inline-block;
+  padding: 2px 7px;
+  margin: 2px 2px 2px 0;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.no-category {
+  color: #bbb;
+  font-size: 0.85rem;
 }
 
 .bulk-actions {

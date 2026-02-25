@@ -39,7 +39,8 @@
     "na": "N/A",
     "clear": "Clear",
     "searching": "Searching...",
-    "selected": "{count} selected"
+    "selected": "{count} selected",
+    "deleting": "Deleting..."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -206,7 +207,37 @@
     "bulkActivate": "Activate Selected",
     "bulkDeactivate": "Deactivate Selected",
     "bulkDelete": "Delete Selected",
-    "trialDays": "Trial Days"
+    "trialDays": "Trial Days",
+    "plansTab": "Plans",
+    "categories": "Categories"
+  },
+  "categories": {
+    "categoriesTab": "Categories",
+    "createCategory": "Create Category",
+    "editCategory": "Edit Category",
+    "updateCategory": "Update Category",
+    "backToCategories": "Back to Plans",
+    "name": "Name",
+    "slug": "Slug",
+    "description": "Description",
+    "type": "Type",
+    "planCount": "Plans",
+    "parent": "Parent",
+    "noParent": "— No parent (root level) —",
+    "isSingle": "Single subscription per user",
+    "isSingleHint": "User can only have one active subscription in this category",
+    "isMultiHint": "User can have multiple active subscriptions in this category",
+    "sortOrder": "Sort Order",
+    "noCategories": "No categories found",
+    "nameRequired": "Category name is required",
+    "failedToLoad": "Failed to load category",
+    "failedToSave": "Failed to save category",
+    "failedToDelete": "Failed to delete category",
+    "confirmDelete": "Are you sure you want to delete this category?",
+    "available": "Available Categories",
+    "assigned": "Assigned Categories",
+    "allAssigned": "All categories assigned",
+    "noneAssigned": "No categories assigned"
   },
   "subscriptions": {
     "title": "Subscriptions",

@@ -95,6 +95,16 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/PlanForm.vue')
       },
       {
+        path: 'plans/categories/new',
+        name: 'category-new',
+        component: () => import('@/views/CategoryForm.vue')
+      },
+      {
+        path: 'plans/categories/:id/edit',
+        name: 'category-edit',
+        component: () => import('@/views/CategoryForm.vue')
+      },
+      {
         path: 'subscriptions',
         name: 'subscriptions',
         component: () => import('@/views/Subscriptions.vue')
