@@ -8,6 +8,13 @@ export interface AdminPlanPrice {
   currency_symbol?: string;
 }
 
+export interface AdminPlanCategory {
+  id: string;
+  name: string;
+  slug: string;
+  is_single: boolean;
+}
+
 export interface AdminPlan {
   id: string;
   name: string;
@@ -21,6 +28,7 @@ export interface AdminPlan {
   subscriber_count?: number;
   created_at?: string;
   trial_days?: number;
+  categories?: AdminPlanCategory[];
 }
 
 export interface CreatePlanData {

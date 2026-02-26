@@ -190,7 +190,7 @@ const route = useRoute();
 const router = useRouter();
 const categoryStore = useCategoryAdminStore();
 
-const isEdit = computed(() => route.params.id && route.params.id !== 'new');
+const isEdit = computed(() => !!(route.params.id && route.params.id !== 'new'));
 const categoryId = computed(() => route.params.id as string);
 
 const loading = computed(() => categoryStore.loading);
