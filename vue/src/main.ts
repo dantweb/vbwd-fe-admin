@@ -41,7 +41,7 @@ app.use(i18n);
 
 // Initialize plugin system
 const registry = new PluginRegistry();
-const sdk = new PlatformSDK();
+const sdk = new PlatformSDK(i18n);
 
 (async () => {
   // Get enabled plugins based on plugins.json configuration

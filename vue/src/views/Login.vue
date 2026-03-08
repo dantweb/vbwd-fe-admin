@@ -14,8 +14,9 @@
           <input
             id="username"
             v-model="username"
-            type="text"
+            type="email"
             required
+            autocomplete="email"
             class="input"
             data-testid="username-input"
           >

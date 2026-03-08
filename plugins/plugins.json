@@ -11,6 +11,12 @@
       "version": "1.0.0",
       "installedAt": "2026-02-16T10:00:00.000Z",
       "source": "local"
+    },
+    "cms-admin": {
+      "enabled": true,
+      "version": "1.0.0",
+      "installedAt": "2026-03-02T00:00:00.000Z",
+      "source": "local"
     }
   }
 }

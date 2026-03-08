@@ -17,6 +17,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/admin',
+    name: 'admin',
     component: AdminLayout,
     meta: { requiresAuth: true },
     children: [

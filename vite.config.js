@@ -17,6 +17,10 @@ export default defineConfig({
   },
   server: {
     allowedHosts: true,
+    hmr: {
+      path: '/__vite_hmr',
+      clientPort: 8081,
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

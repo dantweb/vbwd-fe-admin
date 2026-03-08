@@ -69,6 +69,35 @@
         {{ $t('nav.invoices') }}
       </router-link>
 
+      <!-- Plugin nav sections (registered via extensionRegistry) -->
+      <div
+        v-for="section in pluginNavSections"
+        :key="section.id"
+        class="nav-section"
+      >
+        <button
+          class="nav-section-header"
+          :class="{ expanded: expandedSections[section.id], 'has-active': isSectionActive(section) }"
+          @click="toggleSection(section.id)"
+        >
+          <span>{{ section.label }}</span>
+          <span class="expand-arrow">{{ expandedSections[section.id] ? '▼' : '▶' }}</span>
+        </button>
+        <div
+          v-show="expandedSections[section.id]"
+          class="nav-submenu"
+        >
+          <router-link
+            v-for="item in section.items"
+            :key="item.to"
+            :to="item.to"
+            class="nav-item nav-subitem"
+          >
+            {{ item.label }}
+          </router-link>
+        </div>
+      </div>
+
       <!-- Settings Expandable Section -->
       <div class="nav-section">
         <button
@@ -138,9 +167,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { extensionRegistry } from '@/plugins/extensionRegistry';
+import type { NavSection } from '@/plugins/extensionRegistry';
 
 const router = useRouter();
 const route = useRoute();
@@ -149,6 +180,20 @@ const authStore = useAuthStore();
 const userMenuOpen = ref(false);
 const tarifsExpanded = ref(true); // Start expanded by default
 const settingsExpanded = ref(true); // Start expanded by default
+
+// Plugin nav sections from extensionRegistry
+const pluginNavSections = computed((): NavSection[] => extensionRegistry.getNavSections());
+
+// Tracks expanded state per section id (default: expanded)
+const expandedSections = reactive<Record<string, boolean>>({});
+
+function toggleSection(id: string): void {
+  expandedSections[id] = !(expandedSections[id] ?? true);
+}
+
+function isSectionActive(section: NavSection): boolean {
+  return section.items.some(item => route.path.startsWith(item.to));
+}
 
 const userEmail = computed((): string => {
   return authStore.user?.email || 'Admin';

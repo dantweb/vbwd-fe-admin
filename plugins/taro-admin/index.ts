@@ -23,10 +23,12 @@ export const taroAdminPlugin: IPlugin = {
   },
 
   activate() {
+    extensionRegistry.register('taro', taroAdminExtension);
     console.log('[Taro Admin Plugin] Activated');
   },
 
   deactivate() {
+    extensionRegistry.unregister('taro');
     console.log('[Taro Admin Plugin] Deactivated');
   },
 };

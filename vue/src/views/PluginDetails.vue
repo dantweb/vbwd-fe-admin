@@ -233,11 +233,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, inject, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import type { PluginDetail } from '@/stores/plugins';
+import type { PluginRegistry } from 'vbwd-view-component';
 
 const route = useRoute();
 const router = useRouter();
@@ -254,6 +255,7 @@ const plugin = ref<PluginDetail | null>(null);
 const configValues = reactive<Record<string, unknown>>({});
 
 const pluginName = route.params.pluginName as string;
+const pluginRegistry = inject<PluginRegistry>('pluginRegistry');
 
 function getFieldDescription(key: string): string {
   if (!plugin.value?.configSchema?.[key]) return '';
@@ -314,6 +316,9 @@ async function handleSaveConfig(): Promise<void> {
 
 async function handleActivate(): Promise<void> {
   try {
+    if (pluginRegistry) {
+      await pluginRegistry.activate(pluginName);
+    }
     await pluginsStore.activatePlugin(pluginName);
     if (plugin.value) {
       plugin.value.enabled = true;
@@ -327,6 +332,9 @@ async function handleActivate(): Promise<void> {
 async function handleDeactivate(): Promise<void> {
   if (!confirm(t('adminPlugins.detail.confirmDeactivate'))) return;
   try {
+    if (pluginRegistry) {
+      await pluginRegistry.deactivate(pluginName);
+    }
     await pluginsStore.deactivatePlugin(pluginName);
     if (plugin.value) {
       plugin.value.enabled = false;
