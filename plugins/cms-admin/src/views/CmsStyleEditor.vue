@@ -88,7 +88,7 @@
           <iframe
             ref="previewFrame"
             class="preview-iframe"
-            sandbox="allow-same-origin"
+            sandbox="allow-same-origin allow-scripts"
           />
         </div>
       </div>

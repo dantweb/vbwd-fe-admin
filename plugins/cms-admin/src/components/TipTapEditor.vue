@@ -149,6 +149,7 @@ import { Link } from '@tiptap/extension-link';
 const props = defineProps<{
   modelValue: Record<string, unknown>;
   htmlValue?: string;
+  hideTabBar?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -249,7 +250,16 @@ onBeforeUnmount(() => {
   editor.value?.destroy();
 });
 
-defineExpose({ insertImageUrl });
+function setFromHtml(html: string) {
+  if (editor.value) {
+    editor.value.commands.setContent(html);
+    const json = editor.value.getJSON() as Record<string, unknown>;
+    emit('update:modelValue', json);
+    emit('update:htmlValue', html);
+  }
+}
+
+defineExpose({ insertImageUrl, setFromHtml });
 </script>
 
 <style scoped>

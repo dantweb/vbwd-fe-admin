@@ -33,7 +33,20 @@
       {{ store.error }}
     </div>
 
-    <div class="layout-editor__body">
+    <!-- Body tabs -->
+    <div class="layout-tabs">
+      <button
+        v-for="t in ['Builder', 'Preview']"
+        :key="t"
+        type="button"
+        :class="['layout-tab', { active: activeTab === t }]"
+        @click="activeTab = t as 'Builder' | 'Preview'"
+      >
+        {{ t }}
+      </button>
+    </div>
+
+    <div v-show="activeTab === 'Builder'" class="layout-editor__body">
       <!-- Meta fields -->
       <div class="meta-section card">
         <h3 class="section-title">
@@ -107,7 +120,14 @@
           v-for="(area, idx) in form.areas"
           :key="idx"
           class="area-row"
+          draggable="true"
+          :class="{ 'area-row--dragging': dragIndex === idx }"
+          @dragstart="dragIndex = idx"
+          @dragover.prevent="dragOverIndex = idx"
+          @drop.prevent="onAreaDrop(idx)"
+          @dragend="dragIndex = null; dragOverIndex = null"
         >
+          <span class="drag-handle" title="Drag to reorder">⠿</span>
           <div
             class="field-group"
             style="flex:1"
@@ -223,6 +243,40 @@
       </div>
     </div>
 
+    <!-- Preview tab -->
+    <div v-show="activeTab === 'Preview'" class="layout-preview">
+      <div
+        v-if="!form.areas.length"
+        class="layout-preview__empty"
+      >
+        No areas defined. Add areas in the Builder tab first.
+      </div>
+      <div v-else class="layout-preview__areas">
+        <div
+          v-for="area in form.areas"
+          :key="area.name"
+          :class="['preview-area', `preview-area--${area.type}`]"
+        >
+          <div class="preview-area__label">
+            <span class="preview-area__name">{{ area.label || area.name }}</span>
+            <span class="preview-area__type">({{ area.type }})</span>
+          </div>
+          <div class="preview-area__widget">
+            <template v-if="area.type !== 'content'">
+              <span
+                v-if="assignmentFor(area.name)"
+                class="preview-area__assigned"
+              >
+                {{ widgetNameFor(assignmentFor(area.name)!.widget_id) }}
+              </span>
+              <span v-else class="preview-area__unassigned">— no widget assigned —</span>
+            </template>
+            <span v-else class="preview-area__content-marker">[ page content ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Widget picker modal -->
     <CmsWidgetPicker
       v-if="pickerArea !== null"
@@ -247,6 +301,7 @@ const store = useCmsAdminStore();
 
 const id = route.params.id as string | undefined;
 const isNew = !id;
+const activeTab = ref<'Builder' | 'Preview'>('Builder');
 
 const form = ref({
   name: '',
@@ -260,6 +315,8 @@ const form = ref({
 const assignments = ref<CmsLayoutWidgetAssignment[]>([]);
 const areaError = ref('');
 const pickerArea = ref<string | null>(null);
+const dragIndex = ref<number | null>(null);
+const dragOverIndex = ref<number | null>(null);
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -272,10 +329,25 @@ function addArea() {
   form.value.areas.push({ name: '', type: 'content', label: '' });
 }
 
+function onAreaDrop(toIndex: number) {
+  if (dragIndex.value === null || dragIndex.value === toIndex) return;
+  const areas = [...form.value.areas];
+  const [moved] = areas.splice(dragIndex.value, 1);
+  areas.splice(toIndex, 0, moved);
+  form.value.areas = areas;
+  dragIndex.value = null;
+  dragOverIndex.value = null;
+}
+
 // Non-content areas can get widget assignments
 const assignableAreas = computed(() =>
   form.value.areas.filter(a => a.type !== 'content')
 );
+
+function widgetNameFor(widgetId: string): string {
+  const w = store.widgets?.items?.find(i => i.id === widgetId);
+  return w ? `${w.name} (${w.slug})` : widgetId;
+}
 
 function assignmentFor(areaName: string) {
   return assignments.value.find(a => a.area_name === areaName) ?? null;
@@ -336,6 +408,7 @@ async function remove() {
 }
 
 onMounted(async () => {
+  store.fetchWidgets({ per_page: 200 });
   if (!isNew) {
     await store.fetchLayout(id!);
     const l = store.currentLayout;
@@ -357,6 +430,24 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.layout-tabs { display: flex; border-bottom: 1px solid #e5e7eb; margin-bottom: 1.25rem; }
+.layout-tab { padding: 0.5rem 1.25rem; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-size: 0.9rem; color: #6b7280; }
+.layout-tab.active { color: #1d4ed8; border-bottom-color: #1d4ed8; font-weight: 600; }
+
+.layout-preview { padding: 0.5rem 0; }
+.layout-preview__empty { color: #9ca3af; font-size: 0.9rem; padding: 1rem; }
+.layout-preview__areas { display: flex; flex-direction: column; gap: 8px; }
+.preview-area { border: 2px dashed #d1d5db; border-radius: 6px; padding: 0.75rem 1rem; background: #f9fafb; min-height: 56px; display: flex; flex-direction: column; gap: 4px; }
+.preview-area--header, .preview-area--footer { background: #eff6ff; border-color: #93c5fd; }
+.preview-area--hero { min-height: 100px; background: #f0fdf4; border-color: #86efac; }
+.preview-area--content { background: #fefce8; border-color: #fde047; min-height: 120px; }
+.preview-area__label { display: flex; align-items: center; gap: 0.5rem; }
+.preview-area__name { font-weight: 600; font-size: 0.85rem; color: #374151; font-family: monospace; }
+.preview-area__type { font-size: 0.75rem; color: #6b7280; }
+.preview-area__assigned { font-size: 0.8rem; color: #1d4ed8; background: #dbeafe; padding: 2px 8px; border-radius: 10px; }
+.preview-area__unassigned { font-size: 0.8rem; color: #9ca3af; font-style: italic; }
+.preview-area__content-marker { font-size: 0.8rem; color: #92400e; background: #fef3c7; padding: 2px 8px; border-radius: 10px; }
+
 .layout-editor { padding: 1.5rem; }
 .layout-editor__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
 .layout-editor__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -370,7 +461,11 @@ onMounted(async () => {
 @media (max-width: 800px) { .meta-grid { grid-template-columns: 1fr 1fr; } }
 .checkbox-group { padding-top: 1.5rem; }
 
-.area-row { display: flex; align-items: flex-end; gap: 0.75rem; margin-bottom: 0.5rem; }
+.area-row { display: flex; align-items: flex-end; gap: 0.75rem; margin-bottom: 0.5rem; border-radius: 4px; transition: background 0.1s; }
+.area-row--dragging { opacity: 0.4; }
+.area-row[draggable]:hover { background: #f9fafb; }
+.drag-handle { font-size: 1.2rem; color: #9ca3af; cursor: grab; padding-bottom: 1rem; flex-shrink: 0; user-select: none; }
+.drag-handle:active { cursor: grabbing; }
 .area-remove { margin-bottom: 1rem; flex-shrink: 0; }
 .empty-hint { color: #9ca3af; font-size: 0.875rem; padding: 0.5rem 0; }
 

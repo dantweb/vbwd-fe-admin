@@ -71,19 +71,50 @@
             :key="tab"
             type="button"
             :class="['tab-btn', { active: activeTab === tab }]"
-            @click="activeTab = tab"
+            @click="onPageTabChange(tab)"
           >
             {{ tab }}
           </button>
         </div>
 
-        <!-- Content tab -->
-        <div v-show="activeTab === 'Content'">
+        <!-- WYSIWYG tab -->
+        <div v-show="activeTab === 'WYSIWYG'">
           <TipTapEditor
             ref="editorRef"
             v-model="form.content_json"
             v-model:html-value="form.content_html"
+            hide-tab-bar
             @open-image-picker="imagePickerOpen = true"
+          />
+        </div>
+
+        <!-- HTML tab -->
+        <div v-show="activeTab === 'HTML'">
+          <CodeMirrorEditor
+            v-model="form.content_html"
+            lang="html"
+            min-height="380px"
+          />
+        </div>
+
+        <!-- CSS tab -->
+        <div v-show="activeTab === 'CSS'">
+          <CodeMirrorEditor
+            v-model="form.source_css"
+            lang="css"
+            min-height="380px"
+          />
+          <p class="tab-hint">
+            Page-specific styles injected with this page's content.
+          </p>
+        </div>
+
+        <!-- Preview tab -->
+        <div v-show="activeTab === 'Preview'">
+          <iframe
+            ref="pagePreviewFrame"
+            class="page-preview-iframe"
+            sandbox="allow-same-origin allow-scripts"
           />
         </div>
 
@@ -288,10 +319,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCmsAdminStore } from '../stores/useCmsAdminStore';
 import TipTapEditor from '../components/TipTapEditor.vue';
+import CodeMirrorEditor from '../components/CodeMirrorEditor.vue';
 import CmsImagePicker from '../components/CmsImagePicker.vue';
 
 const route = useRoute();
@@ -301,10 +333,11 @@ const store = useCmsAdminStore();
 const id = computed(() => route.params.id as string | undefined);
 const isNew = computed(() => !id.value);
 
-const tabs = ['Content', 'SEO'];
-const activeTab = ref('Content');
+const tabs = ['WYSIWYG', 'HTML', 'CSS', 'SEO', 'Preview'];
+const activeTab = ref('WYSIWYG');
 const imagePickerOpen = ref(false);
 const editorRef = ref<InstanceType<typeof TipTapEditor> | null>(null);
+const pagePreviewFrame = ref<HTMLIFrameElement | null>(null);
 const schemaJsonText = ref('');
 const schemaError = ref('');
 
@@ -315,6 +348,7 @@ interface PageForm {
   category_id: string;
   content_json: Record<string, unknown>;
   content_html: string;
+  source_css: string;
   is_published: boolean;
   sort_order: number;
   layout_id: string;
@@ -338,6 +372,7 @@ const form = ref<PageForm>({
   category_id: '',
   content_json: { type: 'doc', content: [] },
   content_html: '',
+  source_css: '',
   is_published: false,
   sort_order: 0,
   layout_id: '',
@@ -361,6 +396,27 @@ function slugify(text: string) {
 function autoSlug() {
   if (!form.value.slug) {
     form.value.slug = slugify(form.value.name);
+  }
+}
+
+function updatePagePreview() {
+  const frame = pagePreviewFrame.value;
+  if (!frame) return;
+  const doc = frame.contentDocument;
+  if (!doc) return;
+  doc.open();
+  doc.write(`<!DOCTYPE html><html><head><style>${form.value.source_css}</style></head><body>${form.value.content_html}</body></html>`);
+  doc.close();
+}
+
+async function onPageTabChange(tab: string) {
+  if (tab === 'WYSIWYG' && activeTab.value === 'HTML') {
+    editorRef.value?.setFromHtml(form.value.content_html);
+  }
+  activeTab.value = tab;
+  if (tab === 'Preview') {
+    await nextTick();
+    updatePagePreview();
   }
 }
 
@@ -414,6 +470,7 @@ onMounted(async () => {
         category_id: p.category_id ?? '',
         content_json: p.content_json ?? { type: 'doc', content: [] },
         content_html: (p as any).content_html ?? '',
+        source_css: (p as any).source_css ?? '',
         is_published: p.is_published,
         sort_order: p.sort_order,
         layout_id: (p as any).layout_id ?? '',
@@ -455,6 +512,8 @@ textarea.field-input { resize: vertical; }
 .tab-btn.active { color: #1d4ed8; border-bottom-color: #1d4ed8; font-weight: 600; }
 
 .seo-tab { padding-top: 1rem; }
+.tab-hint { font-size: 0.78rem; color: #6b7280; margin-top: 0.5rem; }
+.page-preview-iframe { width: 100%; height: 500px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; }
 .sidebar-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; }
 
 .btn { padding: 0.45rem 1rem; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer; font-size: 0.875rem; }

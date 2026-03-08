@@ -73,6 +73,18 @@ watch(() => props.modelValue, (val) => {
   }
 });
 
+function insertAtCursor(text: string) {
+  if (!view) return;
+  const { from, to } = view.state.selection.main;
+  view.dispatch({
+    changes: { from, to, insert: text },
+    selection: { anchor: from + text.length },
+  });
+  view.focus();
+}
+
+defineExpose({ insertAtCursor });
+
 onBeforeUnmount(() => {
   view?.destroy();
   view = null;

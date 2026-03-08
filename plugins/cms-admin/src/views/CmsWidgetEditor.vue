@@ -92,23 +92,34 @@
 
       <!-- Type-specific editor -->
       <div class="type-editor">
-        <!-- HTML widget: CodeMirror HTML + CSS editors -->
+        <!-- HTML widget: CodeMirror HTML + CSS editors + Preview -->
         <template v-if="form.widget_type === 'html'">
           <div class="html-widget-editors">
             <div class="editor-pane">
               <div class="editor-pane__tabs">
                 <button
-                  v-for="tab in ['HTML', 'CSS']"
+                  v-for="tab in ['HTML', 'CSS', 'Preview']"
                   :key="tab"
                   type="button"
                   :class="['pane-tab', { active: activeHtmlTab === tab }]"
-                  @click="activeHtmlTab = tab as 'HTML' | 'CSS'"
+                  @click="onWidgetTabChange(tab as 'HTML' | 'CSS' | 'Preview')"
                 >
                   {{ tab }}
                 </button>
               </div>
               <div v-show="activeHtmlTab === 'HTML'">
+                <div class="editor-toolbar">
+                  <button
+                    type="button"
+                    class="toolbar-btn"
+                    title="Insert image from library"
+                    @click="htmlImagePickerOpen = true"
+                  >
+                    + Image
+                  </button>
+                </div>
                 <CodeMirrorEditor
+                  ref="htmlEditorRef"
                   v-model="htmlContent"
                   lang="html"
                   min-height="380px"
@@ -124,6 +135,13 @@
                   Style the widget's structural classes here (e.g. <code>.features__grid</code>,
                   <code>.feature-card</code>). These styles are injected with the widget on the page.
                 </p>
+              </div>
+              <div v-show="activeHtmlTab === 'Preview'">
+                <iframe
+                  ref="widgetPreviewFrame"
+                  class="widget-preview-iframe"
+                  sandbox="allow-same-origin allow-scripts"
+                />
               </div>
             </div>
           </div>
@@ -189,17 +207,24 @@
       </div>
     </div>
 
-    <!-- Image picker -->
+    <!-- Image picker (slideshow) -->
     <CmsImagePicker
       v-if="imagePickerOpen"
       @select="onImageSelected"
       @close="imagePickerOpen = false"
     />
+
+    <!-- Image picker (HTML editor insert) -->
+    <CmsImagePicker
+      v-if="htmlImagePickerOpen"
+      @select="onHtmlImageSelected"
+      @close="htmlImagePickerOpen = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCmsAdminStore } from '../stores/useCmsAdminStore';
 import type { CmsMenuItemData } from '../stores/useCmsAdminStore';
@@ -214,7 +239,10 @@ const store = useCmsAdminStore();
 const id = route.params.id as string | undefined;
 const isNew = !id;
 const imagePickerOpen = ref(false);
-const activeHtmlTab = ref<'HTML' | 'CSS'>('HTML');
+const htmlImagePickerOpen = ref(false);
+const activeHtmlTab = ref<'HTML' | 'CSS' | 'Preview'>('HTML');
+const widgetPreviewFrame = ref<HTMLIFrameElement | null>(null);
+const htmlEditorRef = ref<InstanceType<typeof CodeMirrorEditor> | null>(null);
 
 const form = ref({
   name: '',
@@ -239,11 +267,34 @@ function autoSlug() {
   if (!form.value.slug) form.value.slug = slugify(form.value.name);
 }
 
+function updateWidgetPreview() {
+  const frame = widgetPreviewFrame.value;
+  if (!frame) return;
+  const doc = frame.contentDocument;
+  if (!doc) return;
+  doc.open();
+  doc.write(`<!DOCTYPE html><html><head><style>${cssContent.value}</style></head><body>${htmlContent.value}</body></html>`);
+  doc.close();
+}
+
+async function onWidgetTabChange(tab: 'HTML' | 'CSS' | 'Preview') {
+  activeHtmlTab.value = tab;
+  if (tab === 'Preview') {
+    await nextTick();
+    updateWidgetPreview();
+  }
+}
+
 function onImageSelected(url: string, alt: string) {
   if (form.value.widget_type === 'slideshow') {
     slideshowImages.value.push({ url, alt, caption: '' });
   }
   imagePickerOpen.value = false;
+}
+
+function onHtmlImageSelected(url: string, alt: string) {
+  htmlEditorRef.value?.insertAtCursor(`<img src="${url}" alt="${alt}">`);
+  htmlImagePickerOpen.value = false;
 }
 
 async function save() {
@@ -335,7 +386,13 @@ onMounted(async () => {
 
 .type-editor { min-height: 200px; }
 
+/* Editor toolbar (above HTML CodeMirror) */
+.editor-toolbar { display: flex; gap: 0.5rem; padding: 4px 8px; background: #1e2030; border-bottom: 1px solid #374151; }
+.toolbar-btn { padding: 2px 10px; font-size: 0.78rem; background: #374151; color: #d1d5db; border: 1px solid #4b5563; border-radius: 3px; cursor: pointer; }
+.toolbar-btn:hover { background: #4b5563; color: #f9fafb; }
+
 /* HTML widget tab layout */
+.widget-preview-iframe { width: 100%; height: 420px; border: none; border-radius: 0 0 6px 6px; background: #fff; }
 .html-widget-editors { display: flex; flex-direction: column; gap: 0; }
 .editor-pane__tabs { display: flex; gap: 0; border-bottom: 1px solid #374151; margin-bottom: 0; background: #1e2030; border-radius: 6px 6px 0 0; overflow: hidden; }
 .pane-tab { padding: 0.5rem 1.25rem; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-size: 0.85rem; color: #9ca3af; }
