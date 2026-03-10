@@ -1,5 +1,5 @@
 <template>
-  <div class="cms-images-view">
+  <div class="cms-view cms-images-view">
     <div class="view-header">
       <h2>{{ $t('cms.images') }}</h2>
       <div class="view-header__actions">

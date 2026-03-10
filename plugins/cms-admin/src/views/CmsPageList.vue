@@ -1,5 +1,5 @@
 <template>
-  <div class="cms-pages-view">
+  <div class="cms-view cms-pages-view">
     <div class="view-header">
       <h2>{{ $t('cms.pages') }}</h2>
       <router-link

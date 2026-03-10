@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-editor">
+  <div class="cms-view layout-editor">
     <div class="layout-editor__header">
       <h2>{{ isNew ? 'New Layout' : 'Edit Layout' }}</h2>
       <div class="layout-editor__actions">

@@ -1,5 +1,5 @@
 <template>
-  <div class="page-editor">
+  <div class="cms-view page-editor">
     <div class="page-editor__header">
       <h2>{{ isNew ? $t('cms.newPage') : $t('cms.editPage') }}</h2>
       <div class="page-editor__actions">

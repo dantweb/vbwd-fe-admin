@@ -1,5 +1,5 @@
 <template>
-  <div class="cms-list">
+  <div class="cms-view cms-list">
     <div class="cms-list__header">
       <h1>Styles</h1>
       <div class="cms-list__actions">

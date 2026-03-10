@@ -1,5 +1,5 @@
 <template>
-  <div class="cms-categories-view">
+  <div class="cms-view cms-categories-view">
     <div class="view-header">
       <h2>{{ $t('cms.categories') }}</h2>
       <button

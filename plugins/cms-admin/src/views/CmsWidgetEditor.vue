@@ -1,5 +1,5 @@
 <template>
-  <div class="widget-editor">
+  <div class="cms-view widget-editor">
     <div class="widget-editor__header">
       <h2>{{ isNew ? 'New Widget' : 'Edit Widget' }}</h2>
       <div class="widget-editor__actions">

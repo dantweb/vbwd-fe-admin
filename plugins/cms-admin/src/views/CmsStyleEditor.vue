@@ -1,5 +1,5 @@
 <template>
-  <div class="style-editor">
+  <div class="cms-view style-editor">
     <div class="style-editor__header">
       <h2>{{ isNew ? 'New Style' : 'Edit Style' }}</h2>
       <div class="style-editor__actions">

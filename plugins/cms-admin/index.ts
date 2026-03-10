@@ -9,6 +9,7 @@
 
 import type { IPlugin, IPlatformSDK } from 'vbwd-view-component';
 import { extensionRegistry } from '../../vue/src/plugins/extensionRegistry';
+import './src/cms-admin.css';
 import en from './locales/en.json';
 import ru from './locales/ru.json';
 import de from './locales/de.json';
