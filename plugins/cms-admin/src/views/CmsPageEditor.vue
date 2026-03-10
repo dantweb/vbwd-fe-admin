@@ -493,11 +493,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-editor { padding: 1.5rem; }
+.page-editor { }
 .page-editor__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
 .page-editor__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .page-editor__error { background: #fee2e2; color: #991b1b; padding: 0.6rem 1rem; border-radius: 4px; margin-bottom: 1rem; }
-.page-editor__body { display: grid; grid-template-columns: 1fr 280px; gap: 1.5rem; align-items: start; }
+.page-editor__body { display: grid; grid-template-columns: 1fr 280px; gap: 1.5rem; align-items: start; min-width: 0; overflow: hidden; }
 @media (max-width: 900px) { .page-editor__body { grid-template-columns: 1fr; } }
 
 .field-group { margin-bottom: 1rem; }

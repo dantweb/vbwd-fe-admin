@@ -147,10 +147,44 @@
           </div>
         </template>
 
-        <!-- Menu widget: tree editor -->
+        <!-- Menu widget: Visual / CSS / Preview tabs -->
         <template v-else-if="form.widget_type === 'menu'">
-          <label class="field-label">Menu Items</label>
-          <CmsMenuTreeEditor v-model="menuItems" />
+          <div class="html-widget-editors">
+            <div class="editor-pane">
+              <div class="editor-pane__tabs">
+                <button
+                  v-for="tab in ['Visual', 'CSS', 'Preview']"
+                  :key="tab"
+                  type="button"
+                  :class="['pane-tab', { active: activeMenuTab === tab }]"
+                  @click="onMenuTabChange(tab as 'Visual' | 'CSS' | 'Preview')"
+                >
+                  {{ tab }}
+                </button>
+              </div>
+              <div v-show="activeMenuTab === 'Visual'">
+                <CmsMenuTreeEditor v-model="menuItems" />
+              </div>
+              <div v-show="activeMenuTab === 'CSS'">
+                <CodeMirrorEditor
+                  v-model="menuCssContent"
+                  lang="css"
+                  min-height="380px"
+                />
+                <p class="editor-pane__hint">
+                  Style the menu classes here (<code>.cms-menu</code>, <code>.cms-menu__link</code>,
+                  <code>.cms-burger</code>, etc.). These styles are injected with the widget on the page.
+                </p>
+              </div>
+              <div v-show="activeMenuTab === 'Preview'">
+                <iframe
+                  ref="menuPreviewFrame"
+                  class="widget-preview-iframe"
+                  sandbox="allow-same-origin allow-scripts"
+                />
+              </div>
+            </div>
+          </div>
         </template>
 
         <!-- Slideshow widget: image list -->
@@ -244,6 +278,10 @@ const activeHtmlTab = ref<'HTML' | 'CSS' | 'Preview'>('HTML');
 const widgetPreviewFrame = ref<HTMLIFrameElement | null>(null);
 const htmlEditorRef = ref<InstanceType<typeof CodeMirrorEditor> | null>(null);
 
+const activeMenuTab = ref<'Visual' | 'CSS' | 'Preview'>('Visual');
+const menuPreviewFrame = ref<HTMLIFrameElement | null>(null);
+const menuCssContent = ref('');
+
 const form = ref({
   name: '',
   slug: '',
@@ -285,6 +323,43 @@ async function onWidgetTabChange(tab: 'HTML' | 'CSS' | 'Preview') {
   }
 }
 
+function buildMenuHtml(): string {
+  function renderItems(items: CmsMenuItemData[], parentId: string | null = null): string {
+    const children = items.filter(i => (i.parent_id ?? null) === parentId);
+    if (!children.length) return '';
+    const isRoot = parentId === null;
+    return `<ul class="${isRoot ? 'cms-menu' : 'cms-menu__sub'}">${children.map(item => {
+      const href = item.url ?? (item.page_slug ? `/${item.page_slug}` : '#');
+      const kids = renderItems(items, item.id);
+      return `<li class="cms-menu__item${kids ? ' cms-menu__item--has-children' : ''}"><a href="${href}" class="cms-menu__link">${item.label}${kids ? ' <span class="cms-menu__arrow">▾</span>' : ''}</a>${kids}</li>`;
+    }).join('')}</ul>`;
+  }
+  return `<nav class="cms-widget cms-widget--menu">${renderItems(menuItems.value)}</nav>`;
+}
+
+function updateMenuPreview() {
+  const frame = menuPreviewFrame.value;
+  if (!frame) return;
+  const doc = frame.contentDocument;
+  if (!doc) return;
+  doc.open();
+  doc.write(`<!DOCTYPE html><html><head><style>
+    *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}
+    .cms-menu{list-style:none;margin:0;padding:0}
+    .cms-menu__sub{list-style:none;margin:0;padding:0}
+    ${menuCssContent.value}
+  </style></head><body>${buildMenuHtml()}</body></html>`);
+  doc.close();
+}
+
+async function onMenuTabChange(tab: 'Visual' | 'CSS' | 'Preview') {
+  activeMenuTab.value = tab;
+  if (tab === 'Preview') {
+    await nextTick();
+    updateMenuPreview();
+  }
+}
+
 function onImageSelected(url: string, alt: string) {
   if (form.value.widget_type === 'slideshow') {
     slideshowImages.value.push({ url, alt, caption: '' });
@@ -308,7 +383,7 @@ async function save() {
     payload.source_css = cssContent.value;
   } else if (form.value.widget_type === 'menu') {
     payload.content_json = null;
-    payload.source_css = null;
+    payload.source_css = menuCssContent.value || null;
   } else if (form.value.widget_type === 'slideshow') {
     payload.content_json = { images: slideshowImages.value };
     payload.source_css = null;
@@ -360,8 +435,9 @@ onMounted(async () => {
         cssContent.value = (w as any).source_css ?? '';
       }
 
-      if (w.widget_type === 'menu' && w.menu_items) {
-        menuItems.value = w.menu_items;
+      if (w.widget_type === 'menu') {
+        menuCssContent.value = (w as any).source_css ?? '';
+        if (w.menu_items) menuItems.value = w.menu_items;
       }
       if (w.widget_type === 'slideshow' && w.content_json?.images) {
         slideshowImages.value = (w.content_json.images as any[]).map(i => ({
@@ -374,17 +450,17 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.widget-editor { padding: 1.5rem; }
+.widget-editor { padding: 1rem; }
 .widget-editor__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
 .widget-editor__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .widget-editor__error { background: #fee2e2; color: #991b1b; padding: 0.6rem 1rem; border-radius: 4px; margin-bottom: 1rem; }
-.widget-editor__body { display: flex; flex-direction: column; gap: 1.5rem; }
+.widget-editor__body { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
 
 .meta-fields { display: grid; grid-template-columns: 1fr 1fr 140px 100px 100px; gap: 0 1rem; align-items: start; }
 @media (max-width: 800px) { .meta-fields { grid-template-columns: 1fr 1fr; } }
 .checkbox-group { padding-top: 1.5rem; }
 
-.type-editor { min-height: 200px; }
+.type-editor { min-height: 200px; min-width: 0; overflow: hidden; }
 
 /* Editor toolbar (above HTML CodeMirror) */
 .editor-toolbar { display: flex; gap: 0.5rem; padding: 4px 8px; background: #1e2030; border-bottom: 1px solid #374151; }
@@ -393,7 +469,7 @@ onMounted(async () => {
 
 /* HTML widget tab layout */
 .widget-preview-iframe { width: 100%; height: 420px; border: none; border-radius: 0 0 6px 6px; background: #fff; }
-.html-widget-editors { display: flex; flex-direction: column; gap: 0; }
+.html-widget-editors { display: flex; flex-direction: column; gap: 0; min-width: 0; overflow: hidden; }
 .editor-pane__tabs { display: flex; gap: 0; border-bottom: 1px solid #374151; margin-bottom: 0; background: #1e2030; border-radius: 6px 6px 0 0; overflow: hidden; }
 .pane-tab { padding: 0.5rem 1.25rem; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-size: 0.85rem; color: #9ca3af; }
 .pane-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; background: #1a1a2e; }

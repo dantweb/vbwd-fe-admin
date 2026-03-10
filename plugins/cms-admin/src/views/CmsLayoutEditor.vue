@@ -448,7 +448,7 @@ onMounted(async () => {
 .preview-area__unassigned { font-size: 0.8rem; color: #9ca3af; font-style: italic; }
 .preview-area__content-marker { font-size: 0.8rem; color: #92400e; background: #fef3c7; padding: 2px 8px; border-radius: 10px; }
 
-.layout-editor { padding: 1.5rem; }
+.layout-editor {  }
 .layout-editor__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
 .layout-editor__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .layout-editor__error { background: #fee2e2; color: #991b1b; padding: 0.6rem 1rem; border-radius: 4px; margin-bottom: 1rem; }

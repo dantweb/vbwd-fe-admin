@@ -240,7 +240,7 @@ onMounted(fetch);
 </script>
 
 <style scoped>
-.cms-list { background: var(--admin-card-bg, #fff); padding: 20px; border-radius: 8px; }
+.cms-list { }
 .cms-list__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 0.75rem; }
 .cms-list__header h1 { margin: 0; font-size: 1.25rem; color: var(--admin-heading, #2c3e50); }
 .cms-list__actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }

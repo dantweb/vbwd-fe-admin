@@ -179,7 +179,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.style-editor { padding: 1.5rem; }
+.style-editor { }
 .style-editor__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
 .style-editor__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .style-editor__error { background: #fee2e2; color: #991b1b; padding: 0.6rem 1rem; border-radius: 4px; margin-bottom: 1rem; }
