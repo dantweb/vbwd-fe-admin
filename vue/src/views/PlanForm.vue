@@ -205,6 +205,37 @@
         </div>
       </div>
 
+      <!-- Plugin-contributed plan tabs -->
+      <div
+        v-if="isEdit && visiblePlanTabs.length > 0"
+        class="plan-plugin-tabs"
+      >
+        <div class="plan-plugin-tabs__bar">
+          <button
+            v-for="tab in visiblePlanTabs"
+            :key="tab.label"
+            type="button"
+            class="plan-plugin-tabs__tab"
+            :class="{ 'plan-plugin-tabs__tab--active': activePluginTab === tab.label }"
+            @click="activePluginTab = activePluginTab === tab.label ? null : tab.label"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+        <div
+          v-for="tab in visiblePlanTabs"
+          v-show="activePluginTab === tab.label"
+          :key="tab.label + '-content'"
+          class="plan-plugin-tabs__panel"
+        >
+          <component
+            :is="tab.component"
+            :plan-id="planId"
+            :assigned-categories="assignedCategories"
+          />
+        </div>
+      </div>
+
       <div class="form-actions">
         <div class="form-actions-left">
           <button
@@ -268,6 +299,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePlanAdminStore } from '@/stores/planAdmin';
 import { useCategoryAdminStore, type AdminCategory } from '@/stores/categoryAdmin';
+import { extensionRegistry } from '@/plugins/extensionRegistry';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -289,6 +321,7 @@ const copying = ref(false);
 const planIsActive = ref(true);
 const planCategoryIds = ref<string[]>([]);
 const allCategories = ref<AdminCategory[]>([]);
+const activePluginTab = ref<string | null>(null);
 
 const formData = ref({
   name: '',
@@ -477,6 +510,14 @@ const availableCategories = computed(() => {
 
 const assignedCategories = computed(() => {
   return allCategories.value.filter(c => planCategoryIds.value.includes(c.id));
+});
+
+const visiblePlanTabs = computed(() => {
+  const assignedSlugs = assignedCategories.value.map(c => c.slug);
+  return extensionRegistry.getPlanTabSections().filter(tab => {
+    if (!tab.requiredCategorySlugs || tab.requiredCategorySlugs.length === 0) return true;
+    return tab.requiredCategorySlugs.some(s => assignedSlugs.includes(s));
+  });
 });
 
 async function assignCategory(categoryId: string): Promise<void> {
@@ -841,5 +882,46 @@ onMounted(async () => {
   color: #999;
   font-size: 13px;
   padding: 20px 0;
+}
+
+.plan-plugin-tabs {
+  margin-top: 24px;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.plan-plugin-tabs__bar {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.plan-plugin-tabs__tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-right: 1px solid #e9ecef;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+  transition: background 0.15s;
+}
+
+.plan-plugin-tabs__tab:hover {
+  background: #e9ecef;
+}
+
+.plan-plugin-tabs__tab--active {
+  background: #fff;
+  color: #2c3e50;
+  font-weight: 600;
+  border-bottom: 2px solid #3498db;
+  margin-bottom: -1px;
+}
+
+.plan-plugin-tabs__panel {
+  padding: 24px;
+  background: #fff;
 }
 </style>

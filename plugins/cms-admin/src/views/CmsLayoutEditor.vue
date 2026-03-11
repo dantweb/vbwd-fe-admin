@@ -46,7 +46,10 @@
       </button>
     </div>
 
-    <div v-show="activeTab === 'Builder'" class="layout-editor__body">
+    <div
+      v-show="activeTab === 'Builder'"
+      class="layout-editor__body"
+    >
       <!-- Meta fields -->
       <div class="meta-section card">
         <h3 class="section-title">
@@ -127,7 +130,10 @@
           @drop.prevent="onAreaDrop(idx)"
           @dragend="dragIndex = null; dragOverIndex = null"
         >
-          <span class="drag-handle" title="Drag to reorder">⠿</span>
+          <span
+            class="drag-handle"
+            title="Drag to reorder"
+          >⠿</span>
           <div
             class="field-group"
             style="flex:1"
@@ -244,14 +250,20 @@
     </div>
 
     <!-- Preview tab -->
-    <div v-show="activeTab === 'Preview'" class="layout-preview">
+    <div
+      v-show="activeTab === 'Preview'"
+      class="layout-preview"
+    >
       <div
         v-if="!form.areas.length"
         class="layout-preview__empty"
       >
         No areas defined. Add areas in the Builder tab first.
       </div>
-      <div v-else class="layout-preview__areas">
+      <div
+        v-else
+        class="layout-preview__areas"
+      >
         <div
           v-for="area in form.areas"
           :key="area.name"
@@ -269,9 +281,15 @@
               >
                 {{ widgetNameFor(assignmentFor(area.name)!.widget_id) }}
               </span>
-              <span v-else class="preview-area__unassigned">— no widget assigned —</span>
+              <span
+                v-else
+                class="preview-area__unassigned"
+              >— no widget assigned —</span>
             </template>
-            <span v-else class="preview-area__content-marker">[ page content ]</span>
+            <span
+              v-else
+              class="preview-area__content-marker"
+            >[ page content ]</span>
           </div>
         </div>
       </div>

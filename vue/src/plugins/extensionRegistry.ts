@@ -28,10 +28,21 @@ export interface NavSection {
   items: NavItem[];
 }
 
+export interface PlanTabSection {
+  /** Tab label */
+  label: string;
+  /** Component to render as tab content */
+  component: Component;
+  /** Optional: only show when plan has a category with one of these slugs */
+  requiredCategorySlugs?: string[];
+}
+
 export interface AdminExtension {
   userDetailsSections?: Component[];
   /** Nav sections added to the admin sidebar by this plugin */
   navSections?: NavSection[];
+  /** Plan edit page tab sections contributed by this plugin */
+  planTabSections?: PlanTabSection[];
 }
 
 class ExtensionRegistry {
@@ -81,6 +92,19 @@ class ExtensionRegistry {
       }
     });
     return all;
+  }
+
+  /**
+   * Get all plan tab sections contributed by plugins.
+   */
+  getPlanTabSections(): PlanTabSection[] {
+    const sections: PlanTabSection[] = [];
+    this.extensions.forEach((ext) => {
+      if (ext.planTabSections) {
+        sections.push(...ext.planTabSections);
+      }
+    });
+    return sections;
   }
 
   /**

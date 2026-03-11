@@ -1,7 +1,10 @@
 <template>
   <div class="tiptap-editor">
     <!-- Tab switcher -->
-    <div v-if="!hideTabBar" class="tiptap-tabs">
+    <div
+      v-if="!hideTabBar"
+      class="tiptap-tabs"
+    >
       <button
         type="button"
         class="tiptap-tab"

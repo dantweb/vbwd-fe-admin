@@ -17,6 +17,12 @@
       "version": "1.0.0",
       "installedAt": "2026-03-02T00:00:00.000Z",
       "source": "local"
+    },
+    "ghrm-admin": {
+      "enabled": true,
+      "version": "1.0.0",
+      "installedAt": "",
+      "source": "local"
     }
   }
 }
