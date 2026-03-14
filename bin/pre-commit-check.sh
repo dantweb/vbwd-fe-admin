@@ -139,7 +139,7 @@ run_unit() {
     cd "$REPO_DIR"
 
     echo "Running unit tests..."
-    if npx vitest run vue/tests/unit/ 2>&1 | tail -20; then
+    if npx vitest run vue/tests/unit/ plugins/; then
         print_success "Unit tests passed"
     else
         print_error "Unit tests failed"

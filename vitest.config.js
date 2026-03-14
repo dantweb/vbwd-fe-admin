@@ -7,9 +7,14 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    setupFiles: ['./tests/setup.ts'],
-    include: ['tests/unit/**/*.spec.{js,ts}', 'tests/integration/**/*.spec.{js,ts}'],
-    exclude: ['tests/e2e/**'],
+    setupFiles: ['./vue/tests/setup.ts'],
+    include: [
+      'vue/tests/unit/**/*.spec.{js,ts}',
+      'vue/tests/integration/**/*.spec.{js,ts}',
+      'plugins/*/tests/unit/**/*.spec.{js,ts}',
+      'plugins/*/tests/integration/**/*.spec.{js,ts}',
+    ],
+    exclude: ['tests/e2e/**', 'vue/tests/e2e/**'],
     coverage: {
       reporter: ['text', 'html'],
       exclude: ['node_modules/', 'tests/']
@@ -17,7 +22,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@': fileURLToPath(new URL('./vue/src', import.meta.url)),
       '@plugins': fileURLToPath(new URL('../plugins', import.meta.url))
     },
     dedupe: ['pinia', 'vue']

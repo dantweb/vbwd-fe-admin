@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { api } from '../../../vue/src/api/index'
+import { api } from '@/api'
 
 export interface EmailTemplate {
   id: string
@@ -29,8 +29,7 @@ export const useEmailStore = defineStore('email', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await api.get<EmailTemplate[]>('/admin/email/templates')
-      templates.value = res.data
+      templates.value = await api.get<EmailTemplate[]>('/admin/email/templates')
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : 'Failed to load templates'
     } finally {
@@ -40,8 +39,7 @@ export const useEmailStore = defineStore('email', () => {
 
   async function fetchTemplate(id: string): Promise<EmailTemplate | null> {
     try {
-      const res = await api.get<EmailTemplate>(`/admin/email/templates/${id}`)
-      return res.data
+      return await api.get<EmailTemplate>(`/admin/email/templates/${id}`)
     } catch {
       return null
     }
@@ -49,10 +47,10 @@ export const useEmailStore = defineStore('email', () => {
 
   async function saveTemplate(id: string, data: Partial<EmailTemplate>): Promise<EmailTemplate | null> {
     try {
-      const res = await api.put<EmailTemplate>(`/admin/email/templates/${id}`, data)
+      const saved = await api.put<EmailTemplate>(`/admin/email/templates/${id}`, data)
       const idx = templates.value.findIndex(t => t.id === id)
-      if (idx !== -1) templates.value[idx] = res.data
-      return res.data
+      if (idx !== -1) templates.value[idx] = saved
+      return saved
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : 'Save failed'
       return null
@@ -61,8 +59,7 @@ export const useEmailStore = defineStore('email', () => {
 
   async function fetchEventTypes(): Promise<void> {
     try {
-      const res = await api.get<EventTypeInfo[]>('/admin/email/event-types')
-      eventTypes.value = res.data
+      eventTypes.value = await api.get<EventTypeInfo[]>('/admin/email/event-types')
     } catch {
       // non-fatal
     }
@@ -73,13 +70,33 @@ export const useEmailStore = defineStore('email', () => {
     context: Record<string, unknown>
   ): Promise<{ subject: string; html_body: string; text_body: string } | null> {
     try {
-      const res = await api.post<{ subject: string; html_body: string; text_body: string }>(
+      return await api.post<{ subject: string; html_body: string; text_body: string }>(
         '/admin/email/templates/preview',
         { event_type: eventType, context }
       )
-      return res.data
     } catch {
       return null
+    }
+  }
+
+  async function createTemplate(data: Partial<EmailTemplate>): Promise<EmailTemplate | null> {
+    try {
+      const created = await api.post<EmailTemplate>('/admin/email/templates', data)
+      templates.value.push(created)
+      return created
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Create failed'
+      return null
+    }
+  }
+
+  async function deleteTemplate(id: string): Promise<boolean> {
+    try {
+      await api.delete(`/admin/email/templates/${id}`)
+      templates.value = templates.value.filter(t => t.id !== id)
+      return true
+    } catch {
+      return false
     }
   }
 
@@ -102,7 +119,9 @@ export const useEmailStore = defineStore('email', () => {
     error,
     fetchTemplates,
     fetchTemplate,
+    createTemplate,
     saveTemplate,
+    deleteTemplate,
     fetchEventTypes,
     renderPreview,
     sendTest,

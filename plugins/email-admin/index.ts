@@ -12,14 +12,8 @@ import type { IPlugin, IPlatformSDK } from 'vbwd-view-component'
 import { extensionRegistry } from '../../vue/src/plugins/extensionRegistry'
 import en from './locales/en.json'
 
-const NAV_SECTIONS = [
-  {
-    id: 'messaging',
-    label: 'Messaging',
-    items: [
-      { label: 'Email Templates', to: '/admin/email/templates' },
-    ],
-  },
+const SETTINGS_ITEMS = [
+  { label: 'Email Templates', to: '/admin/email/templates' },
 ]
 
 export const emailAdminPlugin: IPlugin = {
@@ -30,12 +24,18 @@ export const emailAdminPlugin: IPlugin = {
   install(sdk: IPlatformSDK) {
     sdk.addTranslations('en', { email: (en as Record<string, unknown>)['email'] })
 
-    extensionRegistry.register('email-admin', { navSections: NAV_SECTIONS })
+    extensionRegistry.register('email-admin', { settingsItems: SETTINGS_ITEMS })
 
     sdk.addRoute({
       path: 'email/templates',
       name: 'email-templates',
       component: () => import('./src/views/EmailTemplateList.vue'),
+    })
+
+    sdk.addRoute({
+      path: 'email/templates/new',
+      name: 'email-template-new',
+      component: () => import('./src/views/EmailTemplateEdit.vue'),
     })
 
     sdk.addRoute({
@@ -46,7 +46,7 @@ export const emailAdminPlugin: IPlugin = {
   },
 
   activate() {
-    extensionRegistry.register('email-admin', { navSections: NAV_SECTIONS })
+    extensionRegistry.register('email-admin', { settingsItems: SETTINGS_ITEMS })
   },
 
   deactivate() {

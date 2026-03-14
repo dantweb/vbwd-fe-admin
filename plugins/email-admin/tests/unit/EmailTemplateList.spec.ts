@@ -22,7 +22,7 @@ function mountList(storeOverrides = {}) {
     fetchTemplates: vi.fn(),
     ...storeOverrides,
   }
-  ;(useEmailStore as ReturnType<typeof vi.fn>).mockReturnValue(store)
+  vi.mocked(useEmailStore).mockReturnValue(store as never)
 
   return mount(EmailTemplateList, {
     global: {
@@ -38,7 +38,7 @@ describe('EmailTemplateList', () => {
 
   it('calls fetchTemplates on mount', () => {
     const store = { templates: [], loading: false, error: null, fetchTemplates: vi.fn() }
-    ;(useEmailStore as ReturnType<typeof vi.fn>).mockReturnValue(store)
+    vi.mocked(useEmailStore).mockReturnValue(store as never)
     mount(EmailTemplateList, { global: { stubs: { RouterLink: mockRouterLink } } })
     expect(store.fetchTemplates).toHaveBeenCalledOnce()
   })

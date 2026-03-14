@@ -45,7 +45,7 @@ describe('emailAdminPlugin — install()', () => {
       extensionRegistry: { register: vi.fn(), unregister: vi.fn() },
     }))
 
-    plugin.install(mockSdk as never)
+    plugin.install!(mockSdk as never)
 
     expect(mockSdk.addTranslations).toHaveBeenCalledWith('en', expect.objectContaining({ email: expect.any(Object) }))
   })
@@ -57,7 +57,7 @@ describe('emailAdminPlugin — install()', () => {
       addTranslations: vi.fn(),
       addRoute: vi.fn((r) => routes.push(r)),
     }
-    plugin.install(mockSdk as never)
+    plugin.install!(mockSdk as never)
 
     const paths = routes.map(r => r.path)
     expect(paths).toContain('email/templates')
@@ -70,7 +70,7 @@ describe('emailAdminPlugin — install()', () => {
     const { default: plugin } = await import('../../index')
     const mockSdk = { addTranslations: vi.fn(), addRoute: vi.fn() }
 
-    plugin.install(mockSdk as never)
+    plugin.install!(mockSdk as never)
 
     expect(registerSpy).toHaveBeenCalledWith('email-admin', expect.objectContaining({ navSections: expect.any(Array) }))
   })

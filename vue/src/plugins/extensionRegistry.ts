@@ -41,6 +41,8 @@ export interface AdminExtension {
   userDetailsSections?: Component[];
   /** Nav sections added to the admin sidebar by this plugin */
   navSections?: NavSection[];
+  /** Items injected into the core Settings nav section */
+  settingsItems?: NavItem[];
   /** Plan edit page tab sections contributed by this plugin */
   planTabSections?: PlanTabSection[];
 }
@@ -92,6 +94,19 @@ class ExtensionRegistry {
       }
     });
     return all;
+  }
+
+  /**
+   * Get all items to inject into the core Settings nav section.
+   */
+  getSettingsItems(): NavItem[] {
+    const items: NavItem[] = [];
+    this.extensions.forEach((ext) => {
+      if (ext.settingsItems) {
+        items.push(...ext.settingsItems);
+      }
+    });
+    return items;
   }
 
   /**

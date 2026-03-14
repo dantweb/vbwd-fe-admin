@@ -127,6 +127,14 @@
           >
             {{ $t('nav.paymentMethods') }}
           </router-link>
+          <router-link
+            v-for="item in pluginSettingsItems"
+            :key="item.to"
+            :to="item.to"
+            class="nav-item nav-subitem"
+          >
+            {{ item.label }}
+          </router-link>
         </div>
       </div>
     </nav>
@@ -171,7 +179,7 @@ import { computed, ref, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { extensionRegistry } from '@/plugins/extensionRegistry';
-import type { NavSection } from '@/plugins/extensionRegistry';
+import type { NavSection, NavItem } from '@/plugins/extensionRegistry';
 
 const router = useRouter();
 const route = useRoute();
@@ -183,6 +191,9 @@ const settingsExpanded = ref(true); // Start expanded by default
 
 // Plugin nav sections from extensionRegistry
 const pluginNavSections = computed((): NavSection[] => extensionRegistry.getNavSections());
+
+// Plugin items injected into the Settings section
+const pluginSettingsItems = computed((): NavItem[] => extensionRegistry.getSettingsItems());
 
 // Tracks expanded state per section id (default: expanded)
 const expandedSections = reactive<Record<string, boolean>>({});
@@ -208,7 +219,8 @@ const isTarifsActive = computed((): boolean => {
 // Check if current route is within Settings section
 const isSettingsActive = computed((): boolean => {
   const path = route.path;
-  return path.includes('/admin/settings') || path.includes('/admin/payment-methods');
+  if (path.includes('/admin/settings') || path.includes('/admin/payment-methods')) return true;
+  return pluginSettingsItems.value.some(item => path.startsWith(item.to));
 });
 
 function toggleUserMenu(): void {

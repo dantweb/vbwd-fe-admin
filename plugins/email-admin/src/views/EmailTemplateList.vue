@@ -1,38 +1,150 @@
 <template>
-  <div class="email-template-list">
-    <div class="list-header">
+  <div class="email-templates-view">
+    <div class="cms-list__header">
       <h1>Email Templates</h1>
+      <div class="cms-list__actions">
+        <input
+          v-model="query"
+          type="search"
+          placeholder="Search templates…"
+          class="cms-list__search"
+        >
+        <button
+          class="btn btn--primary"
+          @click="$router.push('/admin/email/templates/new')"
+        >
+          + New Template
+        </button>
+      </div>
     </div>
 
-    <div v-if="store.loading" class="loading">Loading…</div>
-    <div v-else-if="store.error" class="error">{{ store.error }}</div>
-    <div v-else-if="store.templates.length === 0" class="empty">
-      No templates found. Run <code>seed_email_templates</code> to create defaults.
+    <!-- Bulk action bar -->
+    <div
+      v-if="selectedIds.size > 0"
+      class="cms-list__bulk-bar"
+    >
+      <span>{{ selectedIds.size }} selected</span>
+      <button
+        class="btn btn--sm"
+        @click="exportSelected"
+      >
+        Export
+      </button>
+      <button
+        class="btn btn--sm"
+        @click="bulkSetActive(true)"
+      >
+        Activate
+      </button>
+      <button
+        class="btn btn--sm"
+        @click="bulkSetActive(false)"
+      >
+        Deactivate
+      </button>
+      <button
+        class="btn btn--sm btn--danger"
+        @click="bulkDelete"
+      >
+        Delete
+      </button>
     </div>
-    <table v-else class="templates-table">
+
+    <div
+      v-if="store.loading"
+      class="cms-table__empty"
+    >
+      Loading…
+    </div>
+    <div
+      v-else-if="store.error"
+      class="tpl-error"
+    >
+      {{ store.error }}
+    </div>
+
+    <table
+      v-else
+      class="cms-table"
+    >
       <thead>
         <tr>
-          <th>Event Type</th>
-          <th>Subject</th>
-          <th>Active</th>
-          <th>Updated</th>
-          <th></th>
+          <th class="cms-table__check">
+            <input
+              type="checkbox"
+              :checked="allSelected"
+              @change="toggleAll"
+            >
+          </th>
+          <th
+            class="sortable"
+            @click="sort('event_type')"
+          >
+            Event Type <span v-if="sortBy === 'event_type'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th
+            class="sortable"
+            @click="sort('subject')"
+          >
+            Subject <span v-if="sortBy === 'subject'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th
+            class="sortable"
+            @click="sort('is_active')"
+          >
+            Active <span v-if="sortBy === 'is_active'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th
+            class="sortable"
+            @click="sort('updated_at')"
+          >
+            Updated <span v-if="sortBy === 'updated_at'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="tpl in store.templates" :key="tpl.id">
-          <td class="event-type">{{ tpl.event_type }}</td>
-          <td>{{ tpl.subject }}</td>
-          <td>
-            <span :class="['badge', tpl.is_active ? 'badge-active' : 'badge-inactive']">
+        <tr
+          v-for="tpl in filteredSorted"
+          :key="tpl.id"
+          class="cms-table__row"
+          @click.self="$router.push(`/admin/email/templates/${tpl.id}/edit`)"
+        >
+          <td @click.stop>
+            <input
+              type="checkbox"
+              :checked="selectedIds.has(tpl.id)"
+              @change="toggleOne(tpl.id)"
+            >
+          </td>
+          <td
+            class="tpl-event-type"
+            @click="$router.push(`/admin/email/templates/${tpl.id}/edit`)"
+          >
+            {{ tpl.event_type }}
+          </td>
+          <td @click="$router.push(`/admin/email/templates/${tpl.id}/edit`)">
+            {{ tpl.subject }}
+          </td>
+          <td @click="$router.push(`/admin/email/templates/${tpl.id}/edit`)">
+            <span :class="['tpl-badge', tpl.is_active ? 'tpl-badge--active' : 'tpl-badge--inactive']">
               {{ tpl.is_active ? 'Active' : 'Inactive' }}
             </span>
           </td>
-          <td>{{ formatDate(tpl.updated_at) }}</td>
-          <td>
-            <router-link :to="`/admin/email/templates/${tpl.id}/edit`" class="btn-edit">
-              Edit
-            </router-link>
+          <td @click="$router.push(`/admin/email/templates/${tpl.id}/edit`)">
+            {{ formatDate(tpl.updated_at) }}
+          </td>
+        </tr>
+        <tr v-if="!filteredSorted.length && !store.loading">
+          <td
+            colspan="5"
+            class="cms-table__empty"
+          >
+            <template v-if="query">
+              No templates match "{{ query }}".
+            </template>
+            <template v-else>
+              No templates found. Run <code>./plugins/email/bin/populate-db.sh</code> to seed defaults.
+            </template>
           </td>
         </tr>
       </tbody>
@@ -41,86 +153,195 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useEmailStore } from '../stores/useEmailStore'
+import type { EmailTemplate } from '../stores/useEmailStore'
 
 const store = useEmailStore()
 
-onMounted(() => {
-  store.fetchTemplates()
+const query = ref('')
+const sortBy = ref<keyof EmailTemplate>('event_type')
+const sortDir = ref<'asc' | 'desc'>('asc')
+const selectedIds = reactive(new Set<string>())
+
+const filtered = computed(() => {
+  const q = query.value.toLowerCase()
+  if (!q) return store.templates
+  return store.templates.filter(t =>
+    t.event_type.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q)
+  )
 })
+
+const filteredSorted = computed(() => {
+  return [...filtered.value].sort((a, b) => {
+    const av = String(a[sortBy.value] ?? '')
+    const bv = String(b[sortBy.value] ?? '')
+    const cmp = av.localeCompare(bv)
+    return sortDir.value === 'asc' ? cmp : -cmp
+  })
+})
+
+const allSelected = computed(() =>
+  filteredSorted.value.length > 0 && filteredSorted.value.every(t => selectedIds.has(t.id))
+)
+
+function sort(col: keyof EmailTemplate) {
+  if (sortBy.value === col) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  else { sortBy.value = col; sortDir.value = 'asc' }
+}
+
+function toggleAll() {
+  if (allSelected.value) filteredSorted.value.forEach(t => selectedIds.delete(t.id))
+  else filteredSorted.value.forEach(t => selectedIds.add(t.id))
+}
+
+function toggleOne(id: string) {
+  if (selectedIds.has(id)) selectedIds.delete(id)
+  else selectedIds.add(id)
+}
+
+async function bulkSetActive(active: boolean) {
+  const ids = [...selectedIds]
+  await Promise.all(ids.map(id => store.saveTemplate(id, { is_active: active })))
+  selectedIds.clear()
+}
+
+async function bulkDelete() {
+  if (!confirm(`Delete ${selectedIds.size} template(s)?`)) return
+  const ids = [...selectedIds]
+  await Promise.all(ids.map(id => store.deleteTemplate(id)))
+  selectedIds.clear()
+}
+
+function exportSelected() {
+  const rows = store.templates.filter(t => selectedIds.has(t.id))
+  const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'email-templates.json'
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
 
 function formatDate(iso: string): string {
   if (!iso) return '—'
-  return iso.slice(0, 10)
+  return new Date(iso).toLocaleDateString()
 }
+
+onMounted(() => { store.fetchTemplates() })
 </script>
 
 <style scoped>
-.email-template-list {
-  padding: 24px;
+.email-templates-view {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
 }
-.list-header {
+
+.cms-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.cms-list__header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--admin-heading, #2c3e50);
+}
+.cms-list__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.cms-list__search {
+  padding: 8px 12px;
+  border: 1px solid var(--admin-input-border, #ddd);
+  border-radius: 4px;
+  font-size: 14px;
+  width: 240px;
+  background: var(--admin-card-bg, #fff);
+  color: var(--admin-text, #333);
+}
+.cms-list__search:focus {
+  outline: none;
+  border-color: var(--admin-focus, #3498db);
+}
+.cms-list__bulk-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 10px;
+  background: var(--admin-bulk-bg, #f0f4f8);
+  border-left: 4px solid var(--admin-bulk-accent, #3498db);
+  padding: 10px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
 }
-h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0;
-}
-.templates-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.templates-table th,
-.templates-table td {
-  padding: 10px 14px;
+
+.cms-table { width: 100%; border-collapse: collapse; }
+.cms-table th,
+.cms-table td {
+  padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--admin-border-light, #eee);
+  font-size: 14px;
+  color: var(--admin-text, #333);
 }
-.templates-table th {
+.cms-table th {
+  background: var(--admin-th-bg, #f8f9fa);
   font-weight: 600;
-  background: #fafafa;
+  color: var(--admin-heading, #2c3e50);
 }
-.event-type {
+.cms-table__check { width: 40px; text-align: center; }
+.cms-table__empty { text-align: center; color: var(--admin-muted, #666); padding: 40px; }
+.cms-table__row { cursor: pointer; transition: background-color 0.15s; }
+.cms-table__row:hover td { background: var(--admin-row-hover, #f8f9fa); }
+.sortable { cursor: pointer; user-select: none; }
+.sortable:hover { background: var(--admin-row-hover, #f8f9fa); }
+
+.tpl-event-type {
   font-family: monospace;
   font-size: 13px;
-  color: #555;
+  color: var(--admin-muted, #555);
 }
-.badge {
+.tpl-badge {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
 }
-.badge-active {
-  background: #d4f0dc;
-  color: #1e7e34;
+.tpl-badge--active {
+  background: var(--admin-badge-ok-bg, #d4edda);
+  color: var(--admin-badge-ok, #155724);
 }
-.badge-inactive {
-  background: #f0d4d4;
-  color: #7e1e1e;
+.tpl-badge--inactive {
+  background: var(--admin-badge-err-bg, #f8d7da);
+  color: var(--admin-badge-err, #721c24);
 }
-.btn-edit {
-  color: #3498db;
-  text-decoration: none;
-  font-size: 14px;
+.tpl-error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
 }
-.btn-edit:hover {
-  text-decoration: underline;
+
+.btn {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--admin-border, #d1d5db);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--admin-text, #333);
 }
-.loading,
-.empty,
-.error {
-  padding: 32px;
-  text-align: center;
-  color: #888;
-}
-.error {
-  color: #e74c3c;
-}
+.btn--sm { font-size: 0.8rem; padding: 0.35rem 0.65rem; }
+.btn--primary { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+.btn--primary:hover { background: #2563eb; }
+.btn--danger { background: #ef4444; color: #fff; border-color: #ef4444; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
