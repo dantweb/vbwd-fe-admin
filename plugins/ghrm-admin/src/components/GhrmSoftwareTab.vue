@@ -144,7 +144,7 @@
           </div>
         </div>
 
-        <!-- Last synced + Sync Now -->
+        <!-- Last synced + Sync Now + Partial Sync buttons -->
         <div class="ghrm-field">
           <label class="ghrm-label">Last Synced</label>
           <div class="ghrm-sync-row">
@@ -163,6 +163,17 @@
             >
               {{ syncing ? 'Syncing...' : 'Sync Now' }}
             </button>
+            <button
+              v-for="field in partialSyncFields"
+              :key="field"
+              type="button"
+              class="ghrm-btn"
+              :disabled="previewState[field].fetching"
+              :data-testid="`ghrm-sync-${field}-btn`"
+              @click="fetchPreview(field)"
+            >
+              {{ previewState[field].fetching ? 'Fetching...' : `Sync ${fieldLabel(field)}` }}
+            </button>
           </div>
           <p
             v-if="syncSuccess"
@@ -176,6 +187,90 @@
           >
             {{ syncError }}
           </p>
+
+          <!-- Preview panels -->
+          <template
+            v-for="field in partialSyncFields"
+            :key="`preview-${field}`"
+          >
+            <div
+              v-if="previewState[field].visible"
+              class="ghrm-preview-panel"
+              :data-testid="`ghrm-preview-panel-${field}`"
+            >
+              <div class="ghrm-preview-header">
+                <strong>Preview: {{ fieldLabel(field) }}</strong>
+              </div>
+
+              <!-- README / Changelog: raw markdown in <pre> -->
+              <template v-if="field === 'readme' || field === 'changelog'">
+                <pre
+                  v-if="previewState[field].content !== null"
+                  class="ghrm-preview-pre"
+                >{{ previewState[field].content }}</pre>
+                <p
+                  v-else
+                  class="ghrm-hint"
+                >
+                  No content available.
+                </p>
+              </template>
+
+              <!-- Screenshots: thumbnail list -->
+              <template v-else-if="field === 'screenshots'">
+                <div
+                  v-if="previewState[field].urls && previewState[field].urls!.length"
+                  class="ghrm-preview-screenshots"
+                >
+                  <img
+                    v-for="(url, idx) in previewState[field].urls"
+                    :key="idx"
+                    :src="url"
+                    class="ghrm-preview-img"
+                    alt="Screenshot preview"
+                  >
+                </div>
+                <p
+                  v-else
+                  class="ghrm-hint"
+                >
+                  No screenshots found.
+                </p>
+              </template>
+
+              <div class="ghrm-preview-actions">
+                <button
+                  type="button"
+                  class="ghrm-btn ghrm-btn--primary"
+                  :disabled="previewState[field].applying"
+                  :data-testid="`ghrm-apply-${field}-btn`"
+                  @click="applyField(field)"
+                >
+                  {{ previewState[field].applying ? 'Applying...' : 'Apply' }}
+                </button>
+                <button
+                  type="button"
+                  class="ghrm-btn"
+                  :data-testid="`ghrm-dismiss-${field}-btn`"
+                  @click="dismissPreview(field)"
+                >
+                  Dismiss
+                </button>
+                <span
+                  v-if="previewState[field].applySuccess"
+                  class="ghrm-success"
+                >
+                  Applied successfully.
+                </span>
+                <span
+                  v-if="previewState[field].applyError"
+                  class="ghrm-error-inline"
+                >
+                  {{ previewState[field].applyError }}
+                </span>
+              </div>
+            </div>
+          </template>
         </div>
       </template>
 
@@ -210,6 +305,18 @@ interface GhrmPackage {
   last_synced_at: string | null;
 }
 
+type PartialSyncField = 'readme' | 'changelog' | 'screenshots';
+
+interface FieldPreviewState {
+  fetching: boolean;
+  visible: boolean;
+  content: string | null;
+  urls: string[] | null;
+  applying: boolean;
+  applySuccess: boolean;
+  applyError: string | null;
+}
+
 const props = defineProps<{
   planId: string;
   assignedCategories: { id: string; slug: string; name: string }[];
@@ -235,6 +342,30 @@ const form = ref({
   author_name: '',
   icon_url: '',
 });
+
+const partialSyncFields: PartialSyncField[] = ['readme', 'changelog', 'screenshots'];
+
+function _makeFieldState(): FieldPreviewState {
+  return {
+    fetching: false,
+    visible: false,
+    content: null,
+    urls: null,
+    applying: false,
+    applySuccess: false,
+    applyError: null,
+  };
+}
+
+const previewState = ref<Record<PartialSyncField, FieldPreviewState>>({
+  readme: _makeFieldState(),
+  changelog: _makeFieldState(),
+  screenshots: _makeFieldState(),
+});
+
+function fieldLabel(field: PartialSyncField): string {
+  return { readme: 'README', changelog: 'Changelog', screenshots: 'Screenshots' }[field];
+}
 
 const apiBase = computed(() => window.location.origin);
 
@@ -347,6 +478,65 @@ async function syncNow(): Promise<void> {
   } finally {
     syncing.value = false;
   }
+}
+
+async function fetchPreview(field: PartialSyncField): Promise<void> {
+  if (!pkg.value) return;
+  const state = previewState.value[field];
+  state.fetching = true;
+  state.visible = false;
+  state.applySuccess = false;
+  state.applyError = null;
+  try {
+    if (field === 'screenshots') {
+      const data = await apiFetch<{ urls: string[] }>(
+        `/api/v1/admin/ghrm/packages/${pkg.value.id}/preview/${field}`
+      );
+      state.urls = data.urls;
+      state.content = null;
+    } else {
+      const data = await apiFetch<{ content: string | null }>(
+        `/api/v1/admin/ghrm/packages/${pkg.value.id}/preview/${field}`
+      );
+      state.content = data.content;
+      state.urls = null;
+    }
+    state.visible = true;
+  } catch (e) {
+    state.applyError = (e as Error).message;
+    state.visible = true;
+  } finally {
+    state.fetching = false;
+  }
+}
+
+async function applyField(field: PartialSyncField): Promise<void> {
+  if (!pkg.value) return;
+  const state = previewState.value[field];
+  state.applying = true;
+  state.applySuccess = false;
+  state.applyError = null;
+  try {
+    await apiFetch(
+      `/api/v1/admin/ghrm/packages/${pkg.value.id}/sync/${field}`,
+      { method: 'POST' }
+    );
+    state.applySuccess = true;
+    setTimeout(() => { state.applySuccess = false; }, 3000);
+  } catch (e) {
+    state.applyError = (e as Error).message;
+  } finally {
+    state.applying = false;
+  }
+}
+
+function dismissPreview(field: PartialSyncField): void {
+  const state = previewState.value[field];
+  state.visible = false;
+  state.content = null;
+  state.urls = null;
+  state.applySuccess = false;
+  state.applyError = null;
 }
 
 async function copyKey(): Promise<void> {
@@ -480,6 +670,7 @@ onMounted(loadPackage);
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .ghrm-sync-time {
@@ -524,5 +715,55 @@ onMounted(loadPackage);
 .ghrm-loading {
   color: #6b7280;
   font-size: 13px;
+}
+
+.ghrm-preview-panel {
+  margin-top: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 14px;
+  background: #f9fafb;
+}
+
+.ghrm-preview-header {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.ghrm-preview-pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  line-height: 1.5;
+  overflow-x: auto;
+  max-height: 320px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ghrm-preview-screenshots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ghrm-preview-img {
+  max-height: 100px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  object-fit: contain;
+}
+
+.ghrm-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 </style>
