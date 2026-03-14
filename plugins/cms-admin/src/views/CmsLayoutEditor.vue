@@ -311,7 +311,7 @@ import { useCmsAdminStore } from '../stores/useCmsAdminStore';
 import type { CmsAreaDefinition, CmsLayoutWidgetAssignment, CmsWidget } from '../stores/useCmsAdminStore';
 import CmsWidgetPicker from '../components/CmsWidgetPicker.vue';
 
-const AREA_TYPES = ['header', 'footer', 'hero', 'slideshow', 'content', 'three-column', 'two-column', 'cta-bar'];
+const AREA_TYPES = ['header', 'footer', 'hero', 'slideshow', 'content', 'three-column', 'two-column', 'cta-bar', 'vue'];
 
 const route = useRoute();
 const router = useRouter();

@@ -15,6 +15,18 @@
     </div>
 
     <template v-else>
+      <!-- Display Name -->
+      <div class="ghrm-field">
+        <label class="ghrm-label">Package Display Name *</label>
+        <input
+          v-model="form.name"
+          class="ghrm-input"
+          type="text"
+          placeholder="e.g. My Analytics Tool"
+          data-testid="ghrm-name"
+        >
+      </div>
+
       <!-- GitHub Repo -->
       <div class="ghrm-field-row">
         <div class="ghrm-field">
@@ -37,6 +49,18 @@
             data-testid="ghrm-github-repo"
           >
         </div>
+      </div>
+
+      <!-- Description -->
+      <div class="ghrm-field">
+        <label class="ghrm-label">Description</label>
+        <textarea
+          v-model="form.description"
+          class="ghrm-input ghrm-textarea"
+          rows="3"
+          placeholder="Short description of the software package"
+          data-testid="ghrm-description"
+        />
       </div>
 
       <!-- Author -->
@@ -168,10 +192,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 
+function authHeaders(): Record<string, string> {
+  const token = localStorage.getItem('admin_token') || '';
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 interface GhrmPackage {
   id: string;
   slug: string;
   name: string;
+  description: string | null;
   author_name: string | null;
   icon_url: string | null;
   github_owner: string;
@@ -198,6 +228,8 @@ const syncError = ref<string | null>(null);
 const pkg = ref<GhrmPackage | null>(null);
 
 const form = ref({
+  name: '',
+  description: '',
   github_owner: '',
   github_repo: '',
   author_name: '',
@@ -211,25 +243,36 @@ const lastSyncedLabel = computed(() => {
   return new Date(pkg.value.last_synced_at).toLocaleString();
 });
 
+async function apiFetch<T>(url: string, options: { method?: string; headers?: Record<string, string>; body?: string } = {}): Promise<T> {
+  const resp = await fetch(url, {
+    ...options,
+    headers: { ...authHeaders(), ...(options.headers || {}) },
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || `Request failed: ${resp.status}`);
+  }
+  return resp.json();
+}
+
 async function loadPackage(): Promise<void> {
   loading.value = true;
   error.value = null;
   try {
-    const resp = await fetch(`/api/v1/admin/ghrm/packages?tariff_plan_id=${props.planId}`, {
-      headers: authHeaders(),
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      const found = (data.items || []).find((p: GhrmPackage) => p.id);
-      if (found) {
-        pkg.value = found;
-        form.value = {
-          github_owner: found.github_owner || '',
-          github_repo: found.github_repo || '',
-          author_name: found.author_name || '',
-          icon_url: found.icon_url || '',
-        };
-      }
+    const data = await apiFetch<{ items: GhrmPackage[] }>(
+      `/api/v1/admin/ghrm/packages?tariff_plan_id=${props.planId}`
+    );
+    const found = (data.items || []).find((p: GhrmPackage) => p.id);
+    if (found) {
+      pkg.value = found;
+      form.value = {
+        name: found.name || '',
+        description: found.description || '',
+        github_owner: found.github_owner || '',
+        github_repo: found.github_repo || '',
+        author_name: found.author_name || '',
+        icon_url: found.icon_url || '',
+      };
     }
   } catch (e) {
     error.value = (e as Error).message;
@@ -238,38 +281,35 @@ async function loadPackage(): Promise<void> {
   }
 }
 
+
 async function save(): Promise<void> {
   saving.value = true;
   saveError.value = null;
   try {
     const body = {
       tariff_plan_id: props.planId,
-      name: props.assignedCategories[0]?.name || form.value.github_repo,
+      name: form.value.name || form.value.github_repo,
       slug: form.value.github_repo.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+      description: form.value.description || null,
       github_owner: form.value.github_owner,
       github_repo: form.value.github_repo,
       author_name: form.value.author_name || null,
       icon_url: form.value.icon_url || null,
     };
-    let resp: Response;
+    const jsonHeaders = { 'Content-Type': 'application/json' };
     if (pkg.value) {
-      resp = await fetch(`/api/v1/admin/ghrm/packages/${pkg.value.id}`, {
+      pkg.value = await apiFetch<GhrmPackage>(`/api/v1/admin/ghrm/packages/${pkg.value.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        headers: jsonHeaders,
         body: JSON.stringify(body),
       });
     } else {
-      resp = await fetch('/api/v1/admin/ghrm/packages', {
+      pkg.value = await apiFetch<GhrmPackage>('/api/v1/admin/ghrm/packages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        headers: jsonHeaders,
         body: JSON.stringify(body),
       });
     }
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.error || 'Save failed');
-    }
-    pkg.value = await resp.json();
   } catch (e) {
     saveError.value = (e as Error).message;
   } finally {
@@ -281,14 +321,13 @@ async function rotateKey(): Promise<void> {
   if (!pkg.value) return;
   rotatingKey.value = true;
   try {
-    const resp = await fetch(`/api/v1/admin/ghrm/packages/${pkg.value.id}/rotate-key`, {
-      method: 'POST',
-      headers: authHeaders(),
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      pkg.value = { ...pkg.value, sync_api_key: data.sync_api_key };
-    }
+    const data = await apiFetch<{ sync_api_key: string }>(
+      `/api/v1/admin/ghrm/packages/${pkg.value.id}/rotate-key`,
+      { method: 'POST' }
+    );
+    pkg.value = { ...pkg.value, sync_api_key: data.sync_api_key };
+  } catch {
+    // silently ignore
   } finally {
     rotatingKey.value = false;
   }
@@ -300,17 +339,9 @@ async function syncNow(): Promise<void> {
   syncSuccess.value = false;
   syncError.value = null;
   try {
-    const resp = await fetch(`/api/v1/admin/ghrm/packages/${pkg.value.id}/sync`, {
-      method: 'POST',
-      headers: authHeaders(),
-    });
-    if (resp.ok) {
-      syncSuccess.value = true;
-      setTimeout(() => { syncSuccess.value = false; }, 3000);
-    } else {
-      const err = await resp.json();
-      syncError.value = err.error || 'Sync failed';
-    }
+    await apiFetch(`/api/v1/admin/ghrm/packages/${pkg.value.id}/sync`, { method: 'POST' });
+    syncSuccess.value = true;
+    setTimeout(() => { syncSuccess.value = false; }, 3000);
   } catch (e) {
     syncError.value = (e as Error).message;
   } finally {
@@ -323,11 +354,6 @@ async function copyKey(): Promise<void> {
   await navigator.clipboard.writeText(pkg.value.sync_api_key);
   keyCopied.value = true;
   setTimeout(() => { keyCopied.value = false; }, 2000);
-}
-
-function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 onMounted(loadPackage);
@@ -364,6 +390,12 @@ onMounted(loadPackage);
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
+}
+
+.ghrm-textarea {
+  resize: vertical;
+  min-height: 72px;
+  line-height: 1.5;
 }
 
 .ghrm-input--mono {

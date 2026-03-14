@@ -16,20 +16,15 @@ export const taroAdminPlugin: IPlugin = {
 
   install() {
     // Register Taro admin extensions
-    console.log('[Taro Admin Plugin] Installing... registering extension:', taroAdminExtension);
     extensionRegistry.register('taro', taroAdminExtension);
-    console.log('[Taro Admin Plugin] Registered admin extensions');
-    console.log('[Taro Admin Plugin] Current sections:', extensionRegistry.getUserDetailsSections());
   },
 
   activate() {
     extensionRegistry.register('taro', taroAdminExtension);
-    console.log('[Taro Admin Plugin] Activated');
   },
 
   deactivate() {
     extensionRegistry.unregister('taro');
-    console.log('[Taro Admin Plugin] Deactivated');
   },
 };
 

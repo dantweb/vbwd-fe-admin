@@ -41,14 +41,14 @@ export const cmsAdminPlugin: IPlugin = {
 
   install(sdk: IPlatformSDK) {
     // Register translations
-    sdk.addTranslations('en', { cms: (en as any).cms });
-    sdk.addTranslations('ru', { cms: (ru as any).cms });
-    sdk.addTranslations('de', { cms: (de as any).cms });
-    sdk.addTranslations('es', { cms: (es as any).cms });
-    sdk.addTranslations('fr', { cms: (fr as any).cms });
-    sdk.addTranslations('ja', { cms: (ja as any).cms });
-    sdk.addTranslations('zh', { cms: (zh as any).cms });
-    sdk.addTranslations('th', { cms: (th as any).cms });
+    sdk.addTranslations('en', { cms: (en as Record<string, unknown>)['cms'] });
+    sdk.addTranslations('ru', { cms: (ru as Record<string, unknown>)['cms'] });
+    sdk.addTranslations('de', { cms: (de as Record<string, unknown>)['cms'] });
+    sdk.addTranslations('es', { cms: (es as Record<string, unknown>)['cms'] });
+    sdk.addTranslations('fr', { cms: (fr as Record<string, unknown>)['cms'] });
+    sdk.addTranslations('ja', { cms: (ja as Record<string, unknown>)['cms'] });
+    sdk.addTranslations('zh', { cms: (zh as Record<string, unknown>)['cms'] });
+    sdk.addTranslations('th', { cms: (th as Record<string, unknown>)['cms'] });
 
     // Register sidebar nav section (also done in activate for re-activation support)
     extensionRegistry.register('cms-admin', { navSections: NAV_SECTIONS });
@@ -132,13 +132,11 @@ export const cmsAdminPlugin: IPlugin = {
   activate() {
     // Re-register nav sections (supports re-activation after deactivate)
     extensionRegistry.register('cms-admin', { navSections: NAV_SECTIONS });
-    console.log('[CMS Admin Plugin] Activated');
   },
 
   deactivate() {
     // Remove nav sections from sidebar when plugin is deactivated
     extensionRegistry.unregister('cms-admin');
-    console.log('[CMS Admin Plugin] Deactivated');
   },
 };
 

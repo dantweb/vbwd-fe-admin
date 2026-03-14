@@ -27,6 +27,9 @@
           <option value="slideshow">
             Slideshow
           </option>
+          <option value="vue-component">
+            Vue Component
+          </option>
         </select>
         <button
           class="btn"

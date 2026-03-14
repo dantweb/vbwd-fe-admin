@@ -179,21 +179,21 @@ export const useCmsAdminStore = defineStore('cms-admin', {
     // ── Categories ────────────────────────────────────────────────────────────
 
     async fetchCategories() {
-      const res = await (api as any).get('/admin/cms/categories');
+      const res = await api.get<any>('/admin/cms/categories');
       this.categories = Array.isArray(res) ? res : (res.items ?? []);
     },
 
     async saveCategory(data: Partial<CmsCategory>) {
       if (data.id) {
-        await (api as any).put(`/admin/cms/categories/${data.id}`, data);
+        await api.put<any>(`/admin/cms/categories/${data.id}`, data);
       } else {
-        await (api as any).post('/admin/cms/categories', data);
+        await api.post<any>('/admin/cms/categories', data);
       }
       await this.fetchCategories();
     },
 
     async deleteCategory(id: string) {
-      await (api as any).delete(`/admin/cms/categories/${id}`);
+      await api.delete<any>(`/admin/cms/categories/${id}`);
       await this.fetchCategories();
     },
 
@@ -203,7 +203,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        const res = await (api as any).get('/admin/cms/pages', { params });
+        const res = await api.get<any>('/admin/cms/pages', { params });
         this.pages = res;
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load pages';
@@ -216,7 +216,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        const res = await (api as any).get(`/admin/cms/pages/${id}`);
+        const res = await api.get<any>(`/admin/cms/pages/${id}`);
         this.currentPage = res;
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load page';
@@ -230,8 +230,8 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.error = null;
       try {
         const res = data.id
-          ? await (api as any).put(`/admin/cms/pages/${data.id}`, data)
-          : await (api as any).post('/admin/cms/pages', data);
+          ? await api.put<any>(`/admin/cms/pages/${data.id}`, data)
+          : await api.post<any>('/admin/cms/pages', data);
         this.currentPage = res;
         return res;
       } catch (e: any) {
@@ -243,12 +243,12 @@ export const useCmsAdminStore = defineStore('cms-admin', {
     },
 
     async deletePage(id: string) {
-      await (api as any).delete(`/admin/cms/pages/${id}`);
+      await api.delete<any>(`/admin/cms/pages/${id}`);
       await this.fetchPages();
     },
 
     async bulkAction(ids: string[], action: string, params: Record<string, unknown> = {}) {
-      await (api as any).post('/admin/cms/pages/bulk', { ids, action, params });
+      await api.post<any>('/admin/cms/pages/bulk', { ids, action, params });
       this.selectedPageIds.clear();
       await this.fetchPages();
     },
@@ -259,7 +259,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        const res = await (api as any).get('/admin/cms/images', { params });
+        const res = await api.get<any>('/admin/cms/images', { params });
         this.images = res;
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load images';
@@ -272,29 +272,29 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       const formData = new FormData();
       formData.append('file', file);
       if (caption) formData.append('caption', caption);
-      const res = await (api as any).post('/admin/cms/images/upload', formData);
+      const res = await api.post<any>('/admin/cms/images/upload', formData);
       await this.fetchImages();
       return res;
     },
 
     async updateImage(id: string, data: Partial<CmsImage>) {
-      await (api as any).put(`/admin/cms/images/${id}`, data);
+      await api.put<any>(`/admin/cms/images/${id}`, data);
       await this.fetchImages();
     },
 
     async deleteImage(id: string) {
-      await (api as any).delete(`/admin/cms/images/${id}`);
+      await api.delete<any>(`/admin/cms/images/${id}`);
       await this.fetchImages();
     },
 
     async bulkDeleteImages(ids: string[]) {
-      await (api as any).post('/admin/cms/images/bulk', { ids, action: 'delete' });
+      await api.post<any>('/admin/cms/images/bulk', { ids, action: 'delete' });
       this.selectedImageIds.clear();
       await this.fetchImages();
     },
 
     async resizeImage(id: string, width: number, height: number): Promise<CmsImage> {
-      const res = await (api as any).post(`/admin/cms/images/${id}/resize`, { width, height });
+      const res = await api.post<any>(`/admin/cms/images/${id}/resize`, { width, height });
       await this.fetchImages();
       return res;
     },
@@ -305,7 +305,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        this.layouts = await (api as any).get('/admin/cms/layouts', { params });
+        this.layouts = await api.get<any>('/admin/cms/layouts', { params });
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load layouts';
       } finally {
@@ -317,7 +317,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        this.currentLayout = await (api as any).get(`/admin/cms/layouts/${id}`);
+        this.currentLayout = await api.get<any>(`/admin/cms/layouts/${id}`);
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load layout';
       } finally {
@@ -330,8 +330,8 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.error = null;
       try {
         const res = data.id
-          ? await (api as any).put(`/admin/cms/layouts/${data.id}`, data)
-          : await (api as any).post('/admin/cms/layouts', data);
+          ? await api.put<any>(`/admin/cms/layouts/${data.id}`, data)
+          : await api.post<any>('/admin/cms/layouts', data);
         this.currentLayout = res;
         return res;
       } catch (e: any) {
@@ -343,17 +343,17 @@ export const useCmsAdminStore = defineStore('cms-admin', {
     },
 
     async setWidgetAssignments(layoutId: string, assignments: CmsLayoutWidgetAssignment[]) {
-      await (api as any).put(`/admin/cms/layouts/${layoutId}/widgets`, assignments);
+      await api.put<any>(`/admin/cms/layouts/${layoutId}/widgets`, assignments);
       await this.fetchLayout(layoutId);
     },
 
     async deleteLayout(id: string) {
-      await (api as any).delete(`/admin/cms/layouts/${id}`);
+      await api.delete<any>(`/admin/cms/layouts/${id}`);
       await this.fetchLayouts();
     },
 
     async bulkDeleteLayouts(ids: string[]) {
-      await (api as any).post('/admin/cms/layouts/bulk', { ids });
+      await api.post<any>('/admin/cms/layouts/bulk', { ids });
       this.selectedLayoutIds.clear();
       await this.fetchLayouts();
     },
@@ -364,7 +364,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
 
     async importLayout(file: File) {
       const payload = JSON.parse(await file.text());
-      await (api as any).post('/admin/cms/layouts/import', payload);
+      await api.post<any>('/admin/cms/layouts/import', payload);
       await this.fetchLayouts();
     },
 
@@ -374,7 +374,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        this.widgets = await (api as any).get('/admin/cms/widgets', { params });
+        this.widgets = await api.get<any>('/admin/cms/widgets', { params });
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load widgets';
       } finally {
@@ -386,7 +386,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        this.currentWidget = await (api as any).get(`/admin/cms/widgets/${id}`);
+        this.currentWidget = await api.get<any>(`/admin/cms/widgets/${id}`);
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load widget';
       } finally {
@@ -399,8 +399,8 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.error = null;
       try {
         const res = data.id
-          ? await (api as any).put(`/admin/cms/widgets/${data.id}`, data)
-          : await (api as any).post('/admin/cms/widgets', data);
+          ? await api.put<any>(`/admin/cms/widgets/${data.id}`, data)
+          : await api.post<any>('/admin/cms/widgets', data);
         this.currentWidget = res;
         return res;
       } catch (e: any) {
@@ -412,17 +412,17 @@ export const useCmsAdminStore = defineStore('cms-admin', {
     },
 
     async replaceMenuTree(widgetId: string, items: CmsMenuItemData[]) {
-      await (api as any).put(`/admin/cms/widgets/${widgetId}/menu`, items);
+      await api.put<any>(`/admin/cms/widgets/${widgetId}/menu`, items);
       await this.fetchWidget(widgetId);
     },
 
     async deleteWidget(id: string) {
-      await (api as any).delete(`/admin/cms/widgets/${id}`);
+      await api.delete<any>(`/admin/cms/widgets/${id}`);
       await this.fetchWidgets();
     },
 
     async bulkDeleteWidgets(ids: string[]) {
-      await (api as any).post('/admin/cms/widgets/bulk', { ids });
+      await api.post<any>('/admin/cms/widgets/bulk', { ids });
       this.selectedWidgetIds.clear();
       await this.fetchWidgets();
     },
@@ -433,7 +433,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
 
     async importWidget(file: File) {
       const payload = JSON.parse(await file.text());
-      await (api as any).post('/admin/cms/widgets/import', payload);
+      await api.post<any>('/admin/cms/widgets/import', payload);
       await this.fetchWidgets();
     },
 
@@ -443,7 +443,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        this.styles = await (api as any).get('/admin/cms/styles', { params });
+        this.styles = await api.get<any>('/admin/cms/styles', { params });
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load styles';
       } finally {
@@ -455,7 +455,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.loading = true;
       this.error = null;
       try {
-        this.currentStyle = await (api as any).get(`/admin/cms/styles/${id}`);
+        this.currentStyle = await api.get<any>(`/admin/cms/styles/${id}`);
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load style';
       } finally {
@@ -468,8 +468,8 @@ export const useCmsAdminStore = defineStore('cms-admin', {
       this.error = null;
       try {
         const res = data.id
-          ? await (api as any).put(`/admin/cms/styles/${data.id}`, data)
-          : await (api as any).post('/admin/cms/styles', data);
+          ? await api.put<any>(`/admin/cms/styles/${data.id}`, data)
+          : await api.post<any>('/admin/cms/styles', data);
         this.currentStyle = res;
         return res;
       } catch (e: any) {
@@ -481,12 +481,12 @@ export const useCmsAdminStore = defineStore('cms-admin', {
     },
 
     async deleteStyle(id: string) {
-      await (api as any).delete(`/admin/cms/styles/${id}`);
+      await api.delete<any>(`/admin/cms/styles/${id}`);
       await this.fetchStyles();
     },
 
     async bulkDeleteStyles(ids: string[]) {
-      await (api as any).post('/admin/cms/styles/bulk', { ids });
+      await api.post<any>('/admin/cms/styles/bulk', { ids });
       this.selectedStyleIds.clear();
       await this.fetchStyles();
     },
@@ -497,7 +497,7 @@ export const useCmsAdminStore = defineStore('cms-admin', {
 
     async importStyle(file: File) {
       const payload = JSON.parse(await file.text());
-      await (api as any).post('/admin/cms/styles/import', payload);
+      await api.post<any>('/admin/cms/styles/import', payload);
       await this.fetchStyles();
     },
   },

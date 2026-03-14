@@ -69,6 +69,9 @@
             <option value="slideshow">
               Slideshow
             </option>
+            <option value="vue-component">
+              Vue Component
+            </option>
           </select>
         </div>
         <div class="field-group">

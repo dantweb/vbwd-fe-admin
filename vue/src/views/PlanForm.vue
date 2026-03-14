@@ -33,200 +33,269 @@
       </button>
     </div>
 
-    <form
-      v-else
-      data-testid="plan-form"
-      class="plan-form"
-      @submit.prevent="handleSubmit"
-    >
+    <template v-else>
       <h2 data-testid="form-title">
         {{ isEdit ? $t('plans.editPlan') : $t('plans.createPlan') }}
       </h2>
 
-      <div
-        v-if="validationError"
-        data-testid="validation-error"
-        class="validation-error"
-      >
-        {{ validationError }}
-      </div>
-
-      <div
-        v-if="submitError"
-        data-testid="submit-error"
-        class="submit-error"
-      >
-        {{ submitError }}
-      </div>
-
-      <div class="form-group">
-        <label for="plan-name">{{ $t('plans.name') }} *</label>
-        <input
-          id="plan-name"
-          v-model="formData.name"
-          data-testid="plan-name"
-          type="text"
-          :placeholder="$t('plans.enterPlanName')"
-          class="form-input"
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="plan-price">{{ $t('plans.price') }} *</label>
-        <input
-          id="plan-price"
-          v-model.number="formData.price"
-          data-testid="plan-price"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-          class="form-input"
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="plan-billing">{{ $t('plans.billingPeriod') }} *</label>
-        <select
-          id="plan-billing"
-          v-model="formData.billing_period"
-          data-testid="plan-billing"
-          class="form-select"
-        >
-          <option value="">
-            {{ $t('plans.selectBillingPeriod') }}
-          </option>
-          <option value="MONTHLY">
-            {{ $t('plans.monthly') }}
-          </option>
-          <option value="YEARLY">
-            {{ $t('plans.yearly') }}
-          </option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="plan-trial-days">{{ $t('plans.trialDays') }}</label>
-        <input
-          id="plan-trial-days"
-          v-model.number="formData.trial_days"
-          data-testid="plan-trial-days"
-          type="number"
-          min="0"
-          placeholder="0"
-          class="form-input"
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="plan-features">{{ $t('plans.featuresOnePerLine') }}</label>
-        <textarea
-          id="plan-features"
-          v-model="featuresText"
-          data-testid="plan-features"
-          rows="4"
-          :placeholder="$t('plans.enterFeatures')"
-          class="form-textarea"
-        />
-      </div>
-
-      <!-- Categories (edit mode only) -->
-      <div
-        v-if="isEdit"
-        class="categories-section"
-        data-testid="categories-section"
-      >
-        <h3>{{ $t('categories.categoriesTab') }}</h3>
-        <div class="categories-panels">
-          <div class="category-panel">
-            <h4>{{ $t('categories.available') }}</h4>
-            <div class="category-list">
-              <div
-                v-for="cat in availableCategories"
-                :key="cat.id"
-                class="category-item"
-                :data-testid="`available-category-${cat.id}`"
-              >
-                <span>{{ cat.name }}</span>
-                <span
-                  class="type-badge"
-                  :class="cat.is_single ? 'single' : 'multi'"
-                >
-                  {{ cat.is_single ? 'Single' : 'Multi' }}
-                </span>
-                <button
-                  type="button"
-                  class="assign-btn"
-                  @click="assignCategory(cat.id)"
-                >
-                  +
-                </button>
-              </div>
-              <p
-                v-if="availableCategories.length === 0"
-                class="empty-hint"
-              >
-                {{ $t('categories.allAssigned') }}
-              </p>
-            </div>
-          </div>
-          <div class="category-panel">
-            <h4>{{ $t('categories.assigned') }}</h4>
-            <div class="category-list">
-              <div
-                v-for="cat in assignedCategories"
-                :key="cat.id"
-                class="category-item"
-                :data-testid="`assigned-category-${cat.id}`"
-              >
-                <span>{{ cat.name }}</span>
-                <span
-                  class="type-badge"
-                  :class="cat.is_single ? 'single' : 'multi'"
-                >
-                  {{ cat.is_single ? 'Single' : 'Multi' }}
-                </span>
-                <button
-                  type="button"
-                  class="unassign-btn"
-                  @click="unassignCategory(cat.id)"
-                >
-                  &times;
-                </button>
-              </div>
-              <p
-                v-if="assignedCategories.length === 0"
-                class="empty-hint"
-              >
-                {{ $t('categories.noneAssigned') }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Plugin-contributed plan tabs -->
-      <div
-        v-if="isEdit && visiblePlanTabs.length > 0"
-        class="plan-plugin-tabs"
-      >
-        <div class="plan-plugin-tabs__bar">
+      <!-- Tab bar: Details + plugin tabs -->
+      <div class="pf-tabs">
+        <div class="pf-tabs__bar">
+          <button
+            type="button"
+            class="pf-tabs__tab"
+            :class="{ 'pf-tabs__tab--active': activeTab === 'details' }"
+            data-testid="tab-details"
+            @click="activeTab = 'details'"
+          >
+            {{ $t('plans.planDetails') }}
+          </button>
           <button
             v-for="tab in visiblePlanTabs"
             :key="tab.label"
             type="button"
-            class="plan-plugin-tabs__tab"
-            :class="{ 'plan-plugin-tabs__tab--active': activePluginTab === tab.label }"
-            @click="activePluginTab = activePluginTab === tab.label ? null : tab.label"
+            class="pf-tabs__tab"
+            :class="{ 'pf-tabs__tab--active': activeTab === tab.label }"
+            :data-testid="`tab-${tab.label.toLowerCase()}`"
+            @click="activeTab = tab.label"
           >
             {{ tab.label }}
           </button>
         </div>
+
+        <!-- Details tab -->
+        <div
+          v-show="activeTab === 'details'"
+          class="pf-tabs__panel"
+        >
+          <form
+            data-testid="plan-form"
+            @submit.prevent="handleSubmit"
+          >
+            <div
+              v-if="validationError"
+              data-testid="validation-error"
+              class="validation-error"
+            >
+              {{ validationError }}
+            </div>
+
+            <div
+              v-if="submitError"
+              data-testid="submit-error"
+              class="submit-error"
+            >
+              {{ submitError }}
+            </div>
+
+            <div class="form-group">
+              <label for="plan-name">{{ $t('plans.name') }} *</label>
+              <input
+                id="plan-name"
+                v-model="formData.name"
+                data-testid="plan-name"
+                type="text"
+                :placeholder="$t('plans.enterPlanName')"
+                class="form-input"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="plan-price">{{ $t('plans.price') }} *</label>
+              <input
+                id="plan-price"
+                v-model.number="formData.price"
+                data-testid="plan-price"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                class="form-input"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="plan-billing">{{ $t('plans.billingPeriod') }} *</label>
+              <select
+                id="plan-billing"
+                v-model="formData.billing_period"
+                data-testid="plan-billing"
+                class="form-select"
+              >
+                <option value="">
+                  {{ $t('plans.selectBillingPeriod') }}
+                </option>
+                <option value="MONTHLY">
+                  {{ $t('plans.monthly') }}
+                </option>
+                <option value="YEARLY">
+                  {{ $t('plans.yearly') }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="plan-trial-days">{{ $t('plans.trialDays') }}</label>
+              <input
+                id="plan-trial-days"
+                v-model.number="formData.trial_days"
+                data-testid="plan-trial-days"
+                type="number"
+                min="0"
+                placeholder="0"
+                class="form-input"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="plan-features">{{ $t('plans.featuresOnePerLine') }}</label>
+              <textarea
+                id="plan-features"
+                v-model="featuresText"
+                data-testid="plan-features"
+                rows="4"
+                :placeholder="$t('plans.enterFeatures')"
+                class="form-textarea"
+              />
+            </div>
+
+            <!-- Categories (edit mode only) -->
+            <div
+              v-if="isEdit"
+              class="categories-section"
+              data-testid="categories-section"
+            >
+              <h3>{{ $t('categories.categoriesTab') }}</h3>
+              <div class="categories-panels">
+                <div class="category-panel">
+                  <h4>{{ $t('categories.available') }}</h4>
+                  <div class="category-list">
+                    <div
+                      v-for="cat in availableCategories"
+                      :key="cat.id"
+                      class="category-item"
+                      :data-testid="`available-category-${cat.id}`"
+                    >
+                      <span>{{ cat.name }}</span>
+                      <span
+                        class="type-badge"
+                        :class="cat.is_single ? 'single' : 'multi'"
+                      >
+                        {{ cat.is_single ? 'Single' : 'Multi' }}
+                      </span>
+                      <button
+                        type="button"
+                        class="assign-btn"
+                        @click="assignCategory(cat.id)"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <p
+                      v-if="availableCategories.length === 0"
+                      class="empty-hint"
+                    >
+                      {{ $t('categories.allAssigned') }}
+                    </p>
+                  </div>
+                </div>
+                <div class="category-panel">
+                  <h4>{{ $t('categories.assigned') }}</h4>
+                  <div class="category-list">
+                    <div
+                      v-for="cat in assignedCategories"
+                      :key="cat.id"
+                      class="category-item"
+                      :data-testid="`assigned-category-${cat.id}`"
+                    >
+                      <span>{{ cat.name }}</span>
+                      <span
+                        class="type-badge"
+                        :class="cat.is_single ? 'single' : 'multi'"
+                      >
+                        {{ cat.is_single ? 'Single' : 'Multi' }}
+                      </span>
+                      <button
+                        type="button"
+                        class="unassign-btn"
+                        @click="unassignCategory(cat.id)"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                    <p
+                      v-if="assignedCategories.length === 0"
+                      class="empty-hint"
+                    >
+                      {{ $t('categories.noneAssigned') }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <div class="form-actions-left">
+                <button
+                  v-if="isEdit && planIsActive"
+                  type="button"
+                  data-testid="archive-button"
+                  class="archive-btn"
+                  :disabled="archiving"
+                  @click="handleArchive"
+                >
+                  {{ archiving ? $t('plans.archiving') : $t('plans.archivePlan') }}
+                </button>
+                <button
+                  v-if="isEdit && !planIsActive"
+                  type="button"
+                  data-testid="reactivate-button"
+                  class="reactivate-btn"
+                  :disabled="reactivating"
+                  @click="handleReactivate"
+                >
+                  {{ reactivating ? $t('plans.reactivating') : $t('plans.reactivatePlan') }}
+                </button>
+                <button
+                  v-if="isEdit"
+                  type="button"
+                  data-testid="copy-button"
+                  class="copy-btn"
+                  :disabled="copying"
+                  @click="handleCopy"
+                >
+                  {{ copying ? $t('plans.copying') : $t('plans.copyPlan') }}
+                </button>
+              </div>
+              <div class="form-actions-right">
+                <button
+                  type="button"
+                  data-testid="cancel-button"
+                  class="cancel-btn"
+                  @click="goBack"
+                >
+                  {{ $t('common.cancel') }}
+                </button>
+                <button
+                  type="button"
+                  data-testid="submit-button"
+                  class="submit-btn"
+                  :disabled="submitting"
+                  @click="handleSubmit"
+                >
+                  {{ submitting ? $t('common.saving') : (isEdit ? $t('plans.updatePlan') : $t('plans.createPlan')) }}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Plugin tabs -->
         <div
           v-for="tab in visiblePlanTabs"
-          v-show="activePluginTab === tab.label"
-          :key="tab.label + '-content'"
-          class="plan-plugin-tabs__panel"
+          v-show="activeTab === tab.label"
+          :key="tab.label + '-panel'"
+          class="pf-tabs__panel"
         >
           <component
             :is="tab.component"
@@ -235,61 +304,7 @@
           />
         </div>
       </div>
-
-      <div class="form-actions">
-        <div class="form-actions-left">
-          <button
-            v-if="isEdit && planIsActive"
-            type="button"
-            data-testid="archive-button"
-            class="archive-btn"
-            :disabled="archiving"
-            @click="handleArchive"
-          >
-            {{ archiving ? $t('plans.archiving') : $t('plans.archivePlan') }}
-          </button>
-          <button
-            v-if="isEdit && !planIsActive"
-            type="button"
-            data-testid="reactivate-button"
-            class="reactivate-btn"
-            :disabled="reactivating"
-            @click="handleReactivate"
-          >
-            {{ reactivating ? $t('plans.reactivating') : $t('plans.reactivatePlan') }}
-          </button>
-          <button
-            v-if="isEdit"
-            type="button"
-            data-testid="copy-button"
-            class="copy-btn"
-            :disabled="copying"
-            @click="handleCopy"
-          >
-            {{ copying ? $t('plans.copying') : $t('plans.copyPlan') }}
-          </button>
-        </div>
-        <div class="form-actions-right">
-          <button
-            type="button"
-            data-testid="cancel-button"
-            class="cancel-btn"
-            @click="goBack"
-          >
-            {{ $t('common.cancel') }}
-          </button>
-          <button
-            type="button"
-            data-testid="submit-button"
-            class="submit-btn"
-            :disabled="submitting"
-            @click="handleSubmit"
-          >
-            {{ submitting ? $t('common.saving') : (isEdit ? $t('plans.updatePlan') : $t('plans.createPlan')) }}
-          </button>
-        </div>
-      </div>
-    </form>
+    </template>
   </div>
 </template>
 
@@ -321,7 +336,7 @@ const copying = ref(false);
 const planIsActive = ref(true);
 const planCategoryIds = ref<string[]>([]);
 const allCategories = ref<AdminCategory[]>([]);
-const activePluginTab = ref<string | null>(null);
+const activeTab = ref<string>('details');
 
 const formData = ref({
   name: '',
@@ -334,11 +349,9 @@ const formData = ref({
 const featuresText = computed({
   get: () => {
     const features = formData.value.features;
-    // Handle features as object (from API) or array
     if (Array.isArray(features)) {
       return features.join('\n');
     } else if (features && typeof features === 'object') {
-      // Convert object to "key: value" lines
       return Object.entries(features)
         .map(([key, value]) => `${key}: ${value}`)
         .join('\n');
@@ -347,16 +360,13 @@ const featuresText = computed({
   },
   set: (value: string) => {
     const lines = value.split('\n').filter(f => f.trim());
-    // Check if input looks like "key: value" format
     const hasKeyValue = lines.some(line => line.includes(':'));
     if (hasKeyValue) {
-      // Parse as object
       const obj: Record<string, string | number | boolean> = {};
       lines.forEach(line => {
         const [key, ...rest] = line.split(':');
         if (key && rest.length) {
           const val = rest.join(':').trim();
-          // Try to parse as number or boolean
           if (val === 'true') obj[key.trim()] = true;
           else if (val === 'false') obj[key.trim()] = false;
           else if (!isNaN(Number(val))) obj[key.trim()] = Number(val);
@@ -377,7 +387,6 @@ async function fetchPlan(): Promise<void> {
   try {
     const response = await planStore.fetchPlan(planId.value);
     if (response) {
-      // Extract price as number (handle both price_float and price object)
       let priceValue = 0;
       if (typeof response.price_float === 'number') {
         priceValue = response.price_float;
@@ -429,18 +438,13 @@ async function handleSubmit(): Promise<void> {
   submitting.value = true;
 
   try {
-    // Type guard ensures billing_period is not empty after validation
-    // Backend expects uppercase enum values (MONTHLY, YEARLY)
-    // Convert to uppercase to ensure compatibility with database enum
     const billingPeriod = formData.value.billing_period.toUpperCase() as 'MONTHLY' | 'YEARLY';
-    // Inject default_tokens into features object
-    let features = formData.value.features;
     const data = {
       name: formData.value.name,
       price: formData.value.price,
       billing_period: billingPeriod,
       trial_days: formData.value.trial_days || 0,
-      features
+      features: formData.value.features
     };
 
     if (isEdit.value) {
@@ -495,7 +499,6 @@ async function handleCopy(): Promise<void> {
   copying.value = true;
   try {
     const newPlan = await planStore.copyPlan(planId.value);
-    // Navigate to the new plan's edit page
     router.push(`/admin/plans/${newPlan.id}/edit`);
   } catch (error) {
     submitError.value = (error as Error).message || t('plans.failedToCopyPlan');
@@ -542,12 +545,10 @@ onMounted(async () => {
   if (isEdit.value) {
     await fetchPlan();
 
-    // Load categories
     try {
       const cats = await categoryStore.fetchCategories('flat');
       allCategories.value = cats;
 
-      // Extract assigned category IDs from the plan data
       const plan = planStore.selectedPlan;
       if (plan && (plan as any).categories) {
         planCategoryIds.value = ((plan as any).categories as { id: string }[]).map(c => c.id);
@@ -615,8 +616,8 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.plan-form h2 {
-  margin: 0 0 25px 0;
+.plan-form-view h2 {
+  margin: 0 0 20px 0;
   color: #2c3e50;
 }
 
@@ -629,6 +630,51 @@ onMounted(async () => {
   margin-bottom: 20px;
   font-size: 14px;
 }
+
+/* ── Tabs ─────────────────────────────────────────────── */
+
+.pf-tabs {
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.pf-tabs__bar {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.pf-tabs__tab {
+  padding: 10px 24px;
+  background: none;
+  border: none;
+  border-right: 1px solid #e9ecef;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.pf-tabs__tab:hover {
+  background: #e9ecef;
+}
+
+.pf-tabs__tab--active {
+  background: #fff;
+  color: #2c3e50;
+  font-weight: 600;
+  border-bottom: 2px solid #3498db;
+  margin-bottom: -1px;
+}
+
+.pf-tabs__panel {
+  padding: 24px;
+  background: #fff;
+}
+
+/* ── Form fields ──────────────────────────────────────── */
 
 .form-group {
   margin-bottom: 20px;
@@ -664,116 +710,7 @@ onMounted(async () => {
   resize: vertical;
 }
 
-.form-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-}
-
-.form-actions-left {
-  display: flex;
-  gap: 12px;
-}
-
-.form-actions-right {
-  display: flex;
-  gap: 12px;
-}
-
-.cancel-btn {
-  padding: 10px 20px;
-  background: #e9ecef;
-  color: #495057;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.cancel-btn:hover {
-  background: #dee2e6;
-}
-
-.submit-btn {
-  padding: 10px 20px;
-  background: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: #1e8449;
-}
-
-.submit-btn:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-}
-
-.archive-btn {
-  padding: 10px 20px;
-  background: #ffc107;
-  color: #212529;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.archive-btn:hover:not(:disabled) {
-  background: #e0a800;
-}
-
-.archive-btn:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-}
-
-.reactivate-btn {
-  padding: 10px 20px;
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.reactivate-btn:hover:not(:disabled) {
-  background: #218838;
-}
-
-.reactivate-btn:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-}
-
-.copy-btn {
-  padding: 10px 20px;
-  background: #17a2b8;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.copy-btn:hover:not(:disabled) {
-  background: #138496;
-}
-
-.copy-btn:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-}
+/* ── Categories ───────────────────────────────────────── */
 
 .categories-section {
   margin-top: 30px;
@@ -884,44 +821,104 @@ onMounted(async () => {
   padding: 20px 0;
 }
 
-.plan-plugin-tabs {
-  margin-top: 24px;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  overflow: hidden;
-}
+/* ── Form actions ─────────────────────────────────────── */
 
-.plan-plugin-tabs__bar {
+.form-actions {
   display: flex;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
 
-.plan-plugin-tabs__tab {
+.form-actions-left,
+.form-actions-right {
+  display: flex;
+  gap: 12px;
+}
+
+.cancel-btn {
   padding: 10px 20px;
-  background: none;
+  background: #e9ecef;
+  color: #495057;
   border: none;
-  border-right: 1px solid #e9ecef;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  color: #555;
-  transition: background 0.15s;
 }
 
-.plan-plugin-tabs__tab:hover {
-  background: #e9ecef;
+.cancel-btn:hover {
+  background: #dee2e6;
 }
 
-.plan-plugin-tabs__tab--active {
-  background: #fff;
-  color: #2c3e50;
-  font-weight: 600;
-  border-bottom: 2px solid #3498db;
-  margin-bottom: -1px;
+.submit-btn {
+  padding: 10px 20px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.plan-plugin-tabs__panel {
-  padding: 24px;
-  background: #fff;
+.submit-btn:hover:not(:disabled) {
+  background: #1e8449;
+}
+
+.submit-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.archive-btn {
+  padding: 10px 20px;
+  background: #ffc107;
+  color: #212529;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.archive-btn:hover:not(:disabled) {
+  background: #e0a800;
+}
+
+.archive-btn:disabled,
+.reactivate-btn:disabled,
+.copy-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.reactivate-btn {
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.reactivate-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.copy-btn {
+  padding: 10px 20px;
+  background: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.copy-btn:hover:not(:disabled) {
+  background: #138496;
 }
 </style>

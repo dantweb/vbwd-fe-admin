@@ -1,13 +1,15 @@
 {
   "tabs": [
     {
+      "id": "settings",
       "label": "Software Catalogue",
       "fields": [
         {
-          "name": "software_category_slugs",
-          "type": "array",
+          "key": "software_category_slugs",
           "label": "Software Category Slugs",
-          "description": "Category slugs that trigger the Software tab on tariff plan edit forms. Plans assigned to any of these categories will show the GitHub repo configuration tab."
+          "component": "input",
+          "inputType": "text",
+          "description": "Comma-separated category slugs that show the Software tab on tariff plan edit forms (e.g. backend,fe-user,fe-admin)"
         }
       ]
     }
