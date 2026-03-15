@@ -50,7 +50,7 @@ describe('emailAdminPlugin — install()', () => {
     expect(mockSdk.addTranslations).toHaveBeenCalledWith('en', expect.objectContaining({ email: expect.any(Object) }))
   })
 
-  it('registers two routes: list + edit', async () => {
+  it('registers routes: list, new, edit', async () => {
     const { default: plugin } = await import('../../index')
     const routes: { path: string; name: string }[] = []
     const mockSdk = {
@@ -72,7 +72,7 @@ describe('emailAdminPlugin — install()', () => {
 
     plugin.install!(mockSdk as never)
 
-    expect(registerSpy).toHaveBeenCalledWith('email-admin', expect.objectContaining({ navSections: expect.any(Array) }))
+    expect(registerSpy).toHaveBeenCalledWith('email-admin', expect.objectContaining({ settingsItems: expect.any(Array) }))
   })
 })
 

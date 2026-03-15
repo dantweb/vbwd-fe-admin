@@ -153,7 +153,7 @@ describe('AddonForm View', () => {
 
     await wrapper.find('[data-testid="addon-name"]').setValue('Test Addon');
     await wrapper.find('[data-testid="addon-price"]').setValue(9.99);
-    await wrapper.find('[data-testid="addon-billing"]').setValue('monthly');
+    await wrapper.find('[data-testid="addon-billing"]').setValue('MONTHLY');
     await wrapper.find('[data-testid="submit-button"]').trigger('click');
     await flushPromises();
 
@@ -335,7 +335,7 @@ describe('AddonForm View', () => {
 
     await wrapper.find('[data-testid="addon-name"]').setValue('Test Addon');
     await wrapper.find('[data-testid="addon-price"]').setValue(9.99);
-    await wrapper.find('[data-testid="addon-billing"]').setValue('monthly');
+    await wrapper.find('[data-testid="addon-billing"]').setValue('MONTHLY');
 
     // Check a plan
     const cb1 = wrapper.find('[data-testid="plan-checkbox-plan-1"]');

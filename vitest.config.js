@@ -23,7 +23,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./vue/src', import.meta.url)),
-      '@plugins': fileURLToPath(new URL('../plugins', import.meta.url))
+      '@plugins': fileURLToPath(new URL('./plugins', import.meta.url))
     },
     dedupe: ['pinia', 'vue']
   }

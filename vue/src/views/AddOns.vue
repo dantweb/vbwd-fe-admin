@@ -172,6 +172,8 @@
           :data-testid="`addon-row-${addon.id}`"
           class="addon-row"
           :class="{ selected: selectedAddons.has(addon.id) }"
+          style="cursor: pointer"
+          @click="navigateToAddon(addon.id)"
         >
           <td
             class="checkbox-col"
@@ -184,7 +186,7 @@
               @change="toggleAddon(addon.id)"
             >
           </td>
-          <td @click="navigateToAddon(addon.id)">
+          <td>
             {{ addon.name }}
           </td>
           <td><code>{{ addon.slug }}</code></td>
