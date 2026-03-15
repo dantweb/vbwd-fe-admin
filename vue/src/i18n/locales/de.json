@@ -54,7 +54,8 @@
     "paymentMethods": "Zahlungsmethoden",
     "countries": "Länder",
     "profile": "Profil",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "sales": "Verkauf"
   },
   "auth": {
     "login": "Anmelden",

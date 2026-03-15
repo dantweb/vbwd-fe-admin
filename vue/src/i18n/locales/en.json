@@ -56,7 +56,8 @@
     "paymentMethods": "Payment Methods",
     "countries": "Countries",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "sales": "Sales"
   },
   "auth": {
     "login": "Login",

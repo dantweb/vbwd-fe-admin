@@ -52,4 +52,14 @@ const pageTitle = computed((): string => {
   gap: 10px;
   align-items: center;
 }
+
+@media (max-width: 1024px) {
+  .admin-topbar {
+    padding: 15px 20px;
+  }
+
+  .topbar-title h1 {
+    font-size: 1.2rem;
+  }
+}
 </style>

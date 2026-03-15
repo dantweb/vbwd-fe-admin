@@ -156,8 +156,11 @@
         </button>
       </div>
 
-      <table
+      <div
         v-else
+        class="plans-table-wrap"
+      >
+      <table
         data-testid="plans-table"
         class="plans-table"
       >
@@ -286,6 +289,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </template>
   </div>
 </template>
@@ -921,5 +925,47 @@ onMounted(() => {
   border-color: #dc3545;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.plans-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .plans-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .plans-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .bulk-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .plans-table {
+    min-width: 640px;
+  }
+
+  .plans-table th,
+  .plans-table td {
+    padding: 10px 10px;
+    font-size: 0.85rem;
+  }
 }
 </style>

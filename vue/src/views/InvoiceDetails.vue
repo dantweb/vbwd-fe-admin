@@ -114,6 +114,8 @@
               <tr
                 v-for="item in invoice.line_items"
                 :key="item.id || item.description"
+                :style="itemLink(item) ? 'cursor: pointer' : ''"
+                @click="itemLink(item) && router.push(itemLink(item)!)"
               >
                 <td>
                   <span
@@ -121,15 +123,7 @@
                     :class="item.type?.toLowerCase()"
                   >{{ itemTypeLabel(item.type) }}</span>
                 </td>
-                <td>
-                  <router-link
-                    v-if="itemLink(item)"
-                    :to="itemLink(item)!"
-                  >
-                    {{ item.description }}
-                  </router-link>
-                  <span v-else>{{ item.description }}</span>
-                </td>
+                <td>{{ item.description }}</td>
                 <td>{{ item.quantity || 1 }}</td>
                 <td>{{ formatAmount(item.unit_price || item.amount, invoice.currency) }}</td>
                 <td>{{ formatAmount(item.amount, invoice.currency) }}</td>
@@ -406,14 +400,13 @@ function itemTypeLabel(type?: string): string {
   return labels[type || ''] || type || 'Item';
 }
 
-function itemLink(item: { type?: string; item_id?: string }): string | null {
-  if (!item.item_id) return null;
-  switch (item.type) {
-    case 'subscription':
-      return `/admin/plans/${item.item_id}/edit`;
-    case 'token_bundle':
-      return `/admin/settings/token-bundles/${item.item_id}`;
-    case 'add_on':
+function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: string }): string | null {
+  switch (item.type?.toUpperCase()) {
+    case 'SUBSCRIPTION':
+      return item.catalog_item_id ? `/admin/plans/${item.catalog_item_id}/edit` : null;
+    case 'TOKEN_BUNDLE':
+      return item.catalog_item_id ? `/admin/settings/token-bundles/${item.catalog_item_id}` : null;
+    case 'ADD_ON':
       return '/admin/add-ons';
     default:
       return null;

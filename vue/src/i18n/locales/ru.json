@@ -51,7 +51,8 @@
     "analytics": "Аналитика",
     "settings": "Настройки",
     "profile": "Профиль",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "sales": "Продажи"
   },
   "auth": {
     "login": "Вход",

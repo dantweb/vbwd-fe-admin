@@ -51,7 +51,8 @@
     "analytics": "分析",
     "settings": "設定",
     "profile": "プロフィール",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "sales": "売上"
   },
   "auth": {
     "login": "ログイン",

@@ -51,7 +51,8 @@
     "analytics": "Analytiques",
     "settings": "Paramètres",
     "profile": "Profil",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "sales": "Ventes"
   },
   "auth": {
     "login": "Connexion",

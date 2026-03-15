@@ -1,5 +1,8 @@
 <template>
-  <aside class="admin-sidebar">
+  <aside
+    class="admin-sidebar"
+    :class="{ 'admin-sidebar-mobile-open': showMobile }"
+  >
     <div class="sidebar-brand">
       <h2>VBWD Admin</h2>
     </div>
@@ -11,16 +14,51 @@
         to="/admin/dashboard"
         class="nav-item"
         data-testid="nav-dashboard"
+        @click="closeNav"
       >
         {{ $t('nav.dashboard') }}
       </router-link>
-      <router-link
-        to="/admin/users"
-        class="nav-item"
-        data-testid="nav-users"
-      >
-        {{ $t('nav.users') }}
-      </router-link>
+      <!-- Sales Expandable Section -->
+      <div class="nav-section">
+        <button
+          class="nav-section-header"
+          :class="{ expanded: salesExpanded, 'has-active': isSalesActive }"
+          data-testid="nav-sales"
+          @click="toggleSales"
+        >
+          <span>{{ $t('nav.sales') }}</span>
+          <span class="expand-arrow">{{ salesExpanded ? '▼' : '▶' }}</span>
+        </button>
+        <div
+          v-show="salesExpanded"
+          class="nav-submenu"
+        >
+          <router-link
+            to="/admin/users"
+            class="nav-item nav-subitem"
+            data-testid="nav-users"
+            @click="closeNav"
+          >
+            {{ $t('nav.users') }}
+          </router-link>
+          <router-link
+            to="/admin/subscriptions"
+            class="nav-item nav-subitem"
+            data-testid="nav-subscriptions"
+            @click="closeNav"
+          >
+            {{ $t('nav.subscriptions') }}
+          </router-link>
+          <router-link
+            to="/admin/invoices"
+            class="nav-item nav-subitem"
+            data-testid="nav-invoices"
+            @click="closeNav"
+          >
+            {{ $t('nav.invoices') }}
+          </router-link>
+        </div>
+      </div>
 
       <!-- Tarifs Expandable Section -->
       <div class="nav-section">
@@ -41,6 +79,7 @@
             to="/admin/plans"
             class="nav-item nav-subitem"
             data-testid="nav-plans"
+            @click="closeNav"
           >
             {{ $t('nav.plans') }}
           </router-link>
@@ -48,26 +87,12 @@
             to="/admin/add-ons"
             class="nav-item nav-subitem"
             data-testid="nav-addons"
+            @click="closeNav"
           >
             {{ $t('nav.addOns') }}
           </router-link>
         </div>
       </div>
-
-      <router-link
-        to="/admin/subscriptions"
-        class="nav-item"
-        data-testid="nav-subscriptions"
-      >
-        {{ $t('nav.subscriptions') }}
-      </router-link>
-      <router-link
-        to="/admin/invoices"
-        class="nav-item"
-        data-testid="nav-invoices"
-      >
-        {{ $t('nav.invoices') }}
-      </router-link>
 
       <!-- Plugin nav sections (registered via extensionRegistry) -->
       <div
@@ -92,6 +117,7 @@
             :key="item.to"
             :to="item.to"
             class="nav-item nav-subitem"
+            @click="closeNav"
           >
             {{ item.label }}
           </router-link>
@@ -117,6 +143,7 @@
             to="/admin/settings"
             class="nav-item nav-subitem"
             data-testid="nav-settings"
+            @click="closeNav"
           >
             {{ $t('nav.settings') }}
           </router-link>
@@ -124,6 +151,7 @@
             to="/admin/payment-methods"
             class="nav-item nav-subitem"
             data-testid="nav-payment-methods"
+            @click="closeNav"
           >
             {{ $t('nav.paymentMethods') }}
           </router-link>
@@ -132,6 +160,7 @@
             :key="item.to"
             :to="item.to"
             class="nav-item nav-subitem"
+            @click="closeNav"
           >
             {{ item.label }}
           </router-link>
@@ -158,7 +187,7 @@
           to="/admin/profile"
           class="dropdown-item"
           data-testid="profile-link"
-          @click="userMenuOpen = false"
+          @click="userMenuOpen = false; closeNav()"
         >
           {{ $t('nav.profile') }}
         </router-link>
@@ -181,13 +210,21 @@ import { useAuthStore } from '@/stores/auth';
 import { extensionRegistry } from '@/plugins/extensionRegistry';
 import type { NavSection, NavItem } from '@/plugins/extensionRegistry';
 
+defineProps<{ showMobile?: boolean }>();
+const emit = defineEmits<{ close: [] }>();
+
+function closeNav() {
+  emit('close');
+}
+
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
 const userMenuOpen = ref(false);
-const tarifsExpanded = ref(true); // Start expanded by default
-const settingsExpanded = ref(true); // Start expanded by default
+const salesExpanded = ref(true);
+const tarifsExpanded = ref(true);
+const settingsExpanded = ref(true);
 
 // Plugin nav sections from extensionRegistry
 const pluginNavSections = computed((): NavSection[] => extensionRegistry.getNavSections());
@@ -210,6 +247,12 @@ const userEmail = computed((): string => {
   return authStore.user?.email || 'Admin';
 });
 
+// Check if current route is within Sales section
+const isSalesActive = computed((): boolean => {
+  const path = route.path;
+  return path.includes('/admin/users') || path.includes('/admin/subscriptions') || path.includes('/admin/invoices');
+});
+
 // Check if current route is within Tarifs section
 const isTarifsActive = computed((): boolean => {
   const path = route.path;
@@ -225,6 +268,10 @@ const isSettingsActive = computed((): boolean => {
 
 function toggleUserMenu(): void {
   userMenuOpen.value = !userMenuOpen.value;
+}
+
+function toggleSales(): void {
+  salesExpanded.value = !salesExpanded.value;
 }
 
 function toggleTarifs(): void {
@@ -436,5 +483,33 @@ async function handleLogout(): Promise<void> {
 .logout-item:hover {
   background-color: rgba(231, 76, 60, 0.2);
   color: #e74c3c;
+}
+
+/* Mobile: slide-in sidebar */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 60px;
+    height: calc(100vh - 60px);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .admin-sidebar-mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-brand {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 100%;
+  }
 }
 </style>

@@ -51,7 +51,8 @@
     "analytics": "分析",
     "settings": "设置",
     "profile": "个人资料",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "sales": "销售"
   },
   "auth": {
     "login": "登录",

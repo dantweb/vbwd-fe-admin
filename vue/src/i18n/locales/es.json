@@ -51,7 +51,8 @@
     "analytics": "Analíticas",
     "settings": "Configuración",
     "profile": "Perfil",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "sales": "Ventas"
   },
   "auth": {
     "login": "Iniciar Sesión",
